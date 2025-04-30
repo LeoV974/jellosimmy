@@ -59,7 +59,7 @@ SIMMY.SpringMesh.prototype.calcGravity = function(gravity, tdelta) {
     }
 };
 
-SIMMY.SpringMesh.prototype.calcInfluence = function(planes, tdelta) {
+SIMMY.SpringMesh.prototype.calcInfluence = function(collisionObjects, tdelta) {
     let node;
 
     // Multi-directional iterations to avoid biasing the simulation
@@ -98,8 +98,8 @@ SIMMY.SpringMesh.prototype.calcInfluence = function(planes, tdelta) {
                 node = this.nodes[i][j][k];
                 
                 // Check plane collisions
-                for (let n = 0; n < planes.planes.length; n++) {
-                    const ret = planes.planes[n].nodeBelow(node);
+                for (let n = 0; n < collisionObjects.planes.length; n++) {
+                    const ret = collisionObjects.planes[n].nodeBelow(node);
                     if (ret.status) {
                         node.position.copy(ret.proj);
                         node.velocityVec.set(0,0,0);
@@ -107,8 +107,8 @@ SIMMY.SpringMesh.prototype.calcInfluence = function(planes, tdelta) {
                 }
                 
                 // Check sphere collisions
-                for (let n = 0; n < planes.spheres.length; n++) {
-                    const ret = planes.spheres[n].nodeBelow(node);
+                for (let n = 0; n < collisionObjects.spheres.length; n++) {
+                    const ret = collisionObjects.spheres[n].nodeBelow(node);
                     if (ret.status) {
                         node.position.copy(ret.proj);
                         node.velocityVec.set(0,0,0);
