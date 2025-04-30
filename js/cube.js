@@ -54,6 +54,17 @@ SIMMY.Cube = function(xSize, ySize, zSize, xNodes, yNodes, zNodes, x, y, z, scen
                     node.addSpring(linearSpring);
                     linearSprings['+x'] = linearSpring;
                 }
+                // X-axis bending springs (2nd neighbor)
+                if (i > 1) { // -2x
+                    linearSpring = new SIMMY.LinearSpring(node, nodesDict[(i-2)+"_"+j+"_"+k], 2 * diffX, kLinearSpring);
+                    node.addSpring(linearSpring);
+                    linearSprings['-2x'] = linearSpring;
+                }
+                if (i < xNodes-2) { //+2x
+                    linearSpring = new SIMMY.LinearSpring(node, nodesDict[(i+2)+"_"+j+"_"+k], 2 * diffX, kLinearSpring);
+                    node.addSpring(linearSpring);
+                    linearSprings['+2x'] = linearSpring;
+                }
                 
                 // Y-axis springs
                 if (j > 0) { //-y
@@ -66,6 +77,17 @@ SIMMY.Cube = function(xSize, ySize, zSize, xNodes, yNodes, zNodes, x, y, z, scen
                     node.addSpring(linearSpring);
                     linearSprings['+y'] = linearSpring;
                 }
+                // Y-axis bending springs
+                if (j > 1) { //-2y
+                    linearSpring = new SIMMY.LinearSpring(node, nodesDict[i+"_"+(j-2)+"_"+k], 2 * diffY, kLinearSpring);
+                    node.addSpring(linearSpring);
+                    linearSprings['-2y'] = linearSpring;
+                }
+                if (j < yNodes-2) { //+2y
+                    linearSpring = new SIMMY.LinearSpring(node, nodesDict[i+"_"+(j+2)+"_"+k], 2 * diffY, kLinearSpring);
+                    node.addSpring(linearSpring);
+                    linearSprings['+2y'] = linearSpring;
+                }
                 
                 // Z-axis springs
                 if (k > 0) { //-z
@@ -77,6 +99,17 @@ SIMMY.Cube = function(xSize, ySize, zSize, xNodes, yNodes, zNodes, x, y, z, scen
                     linearSpring = new SIMMY.LinearSpring(node, nodesDict[i+"_"+j+"_"+(k+1)], diffZ, kLinearSpring);
                     node.addSpring(linearSpring);
                     linearSprings['+z'] = linearSpring;
+                }
+                // Z-axis bending springs
+                if (k > 1) { //-z
+                    linearSpring = new SIMMY.LinearSpring(node, nodesDict[i+"_"+j+"_"+(k-2)], 2 * diffZ, kLinearSpring);
+                    node.addSpring(linearSpring);
+                    linearSprings['-2z'] = linearSpring;
+                }
+                if (k < zNodes-2) { //+z
+                    linearSpring = new SIMMY.LinearSpring(node, nodesDict[i+"_"+j+"_"+(k+2)], 2 * diffZ, kLinearSpring);
+                    node.addSpring(linearSpring);
+                    linearSprings['+2z'] = linearSpring;
                 }
                 
                 // In-plane diagonal springs for better shape retention
@@ -112,11 +145,24 @@ SIMMY.Cube = function(xSize, ySize, zSize, xNodes, yNodes, zNodes, x, y, z, scen
                 }
                 
                 // Angle springs to maintain cube shape
-                const paths = [
-                    ['-x', '+y', '+x', '-y'],
-                    ['-x', '+z', '+x', '-z'],
-                    ['-z', '+y', '+z', '-y']
-                ];
+                // replaced with bending (2nd neighbor) springs
+                // const paths = [
+                //     ['-x', '+y', '+x', '-y'],
+                //     ['-x', '+z', '+x', '-z'],
+                //     ['-z', '+y', '+z', '-y']
+                // ];
+                
+                // for (let n = 0; n < paths.length; n++) {
+                //     for (let m = 0; m < paths[n].length-1; m++) {
+                //         const s1 = linearSprings[paths[n][m]];
+                //         const s2 = linearSprings[paths[n][m+1]];
+                //         if (s1 && s2) {
+                //             const angleSpring = new SIMMY.AngleSpring(node, s1.node2, s2.node2, Math.PI/2, kAngleSpring);
+                //             node.addSpring(angleSpring);
+                //         }
+                //     }
+                // }
+
                 
                 for (let n = 0; n < paths.length; n++) {
                     for (let m = 0; m < paths[n].length-1; m++) {
