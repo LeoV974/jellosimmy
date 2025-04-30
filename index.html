@@ -19,6 +19,13 @@
             margin: 5px;
             padding: 5px 10px;
         }
+        select {
+            margin: 5px 0;
+            padding: 5px;
+        }
+        .control-group {
+            margin-bottom: 10px;
+        }
     </style>
     <script type="importmap">
     {
@@ -31,14 +38,29 @@
 </head>
 <body>
     <div id="controls">
-        <button id="reset">Reset Jello</button>
-        <button id="disturb">Disturb</button>
-        <button id="debug-toggle">Debug toggle</button>
-        <div>
+        <div class="control-group">
+            <button id="reset">Reset Jello</button>
+            <button id="disturb">Disturb</button>
+            <button id="debug-toggle">Debug toggle</button>
+        </div>
+        <div class="control-group">
             <label>Collision Type:</label>
             <select id="collisionType">
                 <option value="plane">Plane</option>
                 <option value="sphere">Sphere</option>
+            </select>
+        </div>
+        <div class="control-group">
+            <label>Shader Type:</label>
+            <select id="shaderType">
+                <option value="standard">Standard</option>
+                <option value="phong">Phong</option>
+                <option value="toon">Toon</option>
+                <option value="physical">Physical</option>
+                <option value="wireframe">Wireframe</option>
+                <option value="crystal">Crystal</option>
+                <option value="mirror">Mirror</option>
+                <option value="material">Material</option>
             </select>
         </div>
     </div>

@@ -19,7 +19,11 @@ class JelloSimulator {
         this.simulator = new SIMMY.Simulator(new THREE.Vector3(0, -9.8, 0));
         this.setupLights();
         
-        // Initialize collision objects first
+        // Setup material presets first
+        this.setupMaterialPresets();
+        this.currentMaterialType = 'standard';
+        
+        // Initialize collision objects
         this.collisionType = 'plane';
         this.initCollisionObjects();
         this.setupScene();
@@ -28,6 +32,8 @@ class JelloSimulator {
         this.onWindowResize = this.onWindowResize.bind(this);
         this.resetJello = this.resetJello.bind(this);
         this.disturbJello = this.disturbJello.bind(this);
+        this.changeShader = this.changeShader.bind(this); // Bind changeShader method
+        
         window.addEventListener('resize', this.onWindowResize);
         document.getElementById('reset').addEventListener('click', this.resetJello);
         document.getElementById('disturb').addEventListener('click', this.disturbJello);
@@ -36,12 +42,110 @@ class JelloSimulator {
         document.getElementById('collisionType').addEventListener('change', (e) => {
             this.switchCollisionType(e.target.value);
         });
+
+        document.getElementById('shaderType').addEventListener('change', (e) => {
+            this.changeShader(e.target.value);
+        });
         
         // Start animation loop
         this.lastTime = Date.now();
         this.animate();
         this.setupDebugControls();
         this.enableDebugVisuals();
+    }
+
+    setupMaterialPresets() {
+        // Create environment map for crystal and mirror materials
+        const cubeTextureLoader = new THREE.CubeTextureLoader();
+        const envMap = cubeTextureLoader.setPath('https://cdn.jsdelivr.net/gh/mrdoob/three.js/examples/textures/cube/pisa/')
+            .load(['px.png', 'nx.png', 'py.png', 'ny.png', 'pz.png', 'nz.png']);
+            
+        this.materialPresets = {
+            standard: new THREE.MeshPhongMaterial({
+                color: 0x00ff88,
+                transparent: true,
+                opacity: 0.8,
+                side: THREE.DoubleSide,
+                flatShading: false
+            }),
+            phong: new THREE.MeshPhongMaterial({
+                color: 0x8800ff,
+                specular: 0xffffff,
+                shininess: 100,
+                transparent: true,
+                opacity: 0.8,
+                side: THREE.DoubleSide,
+                flatShading: false
+            }),
+
+            toon: new THREE.MeshToonMaterial({
+                color: 0xff0000,
+                transparent: true,
+                opacity: 0.9,
+                side: THREE.DoubleSide
+            }),
+            
+            physical: new THREE.MeshStandardMaterial({
+                color: 0xffd700,
+                metalness: 0.6,
+                roughness: 0.2,
+                transparent: true,
+                opacity: 0.8,
+                side: THREE.DoubleSide
+            }),
+            
+            wireframe: new THREE.MeshBasicMaterial({
+                color: 0xff00ff,
+                wireframe: true,
+                transparent: true,
+                opacity: 0.9
+            }),
+
+            crystal: new THREE.MeshPhysicalMaterial({
+                color: 0x88ccff,       // Light blue color
+                metalness: 0.0,        // Non-metallic
+                roughness: 0.0,        // Perfectly smooth
+                transmission: 0.95,    // High transparency
+                transparent: true,
+                opacity: 0.7,
+                side: THREE.DoubleSide,
+                envMap: envMap,        // Environment map for reflections
+                envMapIntensity: 1.5,  // Strong reflections
+                clearcoat: 0.8,        // Glossy surface
+                clearcoatRoughness: 0.2,
+                ior: 2.33,             // High Index of Refraction for crystal
+                reflectivity: 0.8      // High reflectivity
+            }),
+            
+            // Improved mirror material
+            mirror: new THREE.MeshStandardMaterial({
+                color: 0xf0f0f0,       // Slight off-white for realism
+                metalness: 1.0,        // Fully metallic for mirror effect
+                roughness: 0.05,       // Slightly rough for better realism
+                envMap: envMap,        // Environment map for reflections
+                envMapIntensity: 1.5,  // Stronger reflections
+                side: THREE.DoubleSide
+            }),
+            
+            // Basic material - added proper color
+            material: new THREE.MeshPhongMaterial({
+                color: 0x2194ce,       // Nice blue color
+                shininess: 30,
+                side: THREE.DoubleSide
+            })
+        };
+    }
+
+    changeShader(shaderType) {
+        if (!this.jelloCube || !this.materialPresets[shaderType]) {
+            console.error('Cannot change shader: missing cube or material type');
+            return;
+        }
+        const newMaterial = this.materialPresets[shaderType].clone();
+        this.jelloCube.mesh.material = newMaterial;
+        this.jelloCube.mesh.geometry.computeVertexNormals();
+        this.currentMaterialType = shaderType;
+        this.renderer.render(this.scene, this.camera);
     }
     
     initCollisionObjects() {
@@ -78,6 +182,12 @@ class JelloSimulator {
         this.jelloCube = new SIMMY.Cube(2.5, 2.5, 2.5, 4, 4, 4, 0, 2, 0, this.scene);
         this.jelloCube.mesh.castShadow = true;
         this.jelloCube.mesh.receiveShadow = true;
+        
+        // Apply initial material
+        if (this.currentMaterialType && this.materialPresets[this.currentMaterialType]) {
+            this.jelloCube.mesh.material = this.materialPresets[this.currentMaterialType].clone();
+        }
+        
         this.simulator.addSpringMesh(this.jelloCube);
     }
     
@@ -132,8 +242,7 @@ class JelloSimulator {
         this.jelloCube.updateGeometry();
         this.controls.update();
         this.renderer.render(this.scene, this.camera);
-        // Add this to your animate function to update debug visuals
-        // Place this code at the end of your animate method before rendering
+        
         // Update debug visuals if enabled
         if (this.debugVisualsEnabled && this.debugPoints && this.animateDebug) {
             for (let i = 0; i < this.debugPoints.length; i++) {
@@ -142,7 +251,6 @@ class JelloSimulator {
             this.disableDebugVisuals();
             this.enableDebugVisuals();
         }
-        
     }
     
     onWindowResize() {
@@ -153,6 +261,13 @@ class JelloSimulator {
     
     resetJello() {
         this.jelloCube.reset();
+        
+        // Make sure to apply the current material type after reset
+        if (this.currentMaterialType && this.materialPresets[this.currentMaterialType]) {
+            this.jelloCube.mesh.material = this.materialPresets[this.currentMaterialType].clone();
+        }
+        
+        this.jelloCube.updateGeometry();
     }
     
     disturbJello() {

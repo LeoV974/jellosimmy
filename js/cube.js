@@ -340,6 +340,7 @@ SIMMY.Cube = function(xSize, ySize, zSize, xNodes, yNodes, zNodes, x, y, z, scen
     
     // Set geometry attributes
     geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+    //geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
     geometry.setIndex(indices);
     geometry.computeVertexNormals();
     
@@ -349,7 +350,9 @@ SIMMY.Cube = function(xSize, ySize, zSize, xNodes, yNodes, zNodes, x, y, z, scen
         transparent: true,
         opacity: 0.8,
         side: THREE.DoubleSide,
-        flatShading: true
+        flatShading: false,
+        specular: 0xffffff,
+        shininess: 30
     });
     
     this.mesh = new THREE.Mesh(geometry, material);
