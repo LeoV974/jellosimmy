@@ -18,7 +18,12 @@ class JelloSimulator {
         this.controls.dampingFactor = 0.05;
         this.simulator = new SIMMY.Simulator(new THREE.Vector3(0, -2.5, 0));
         this.setupLights();
+        
+        // Initialize collision objects first
+        this.collisionType = 'plane';
+        this.initCollisionObjects();
         this.setupScene();
+        
         this.animate = this.animate.bind(this);
         this.onWindowResize = this.onWindowResize.bind(this);
         this.resetJello = this.resetJello.bind(this);
@@ -27,9 +32,25 @@ class JelloSimulator {
         document.getElementById('reset').addEventListener('click', this.resetJello);
         document.getElementById('disturb').addEventListener('click', this.disturbJello);
         
+        document.getElementById('collisionType').addEventListener('change', (e) => {
+            this.switchCollisionType(e.target.value);
+        });
+        
         // Start animation loop
         this.lastTime = Date.now();
         this.animate();
+    }
+    
+    initCollisionObjects() {
+        // Create floor plane
+        this.floor = new SIMMY.Plane(new THREE.Vector3(0, -2, 0), new THREE.Vector3(0, 1, 0), 20, 20, this.scene);
+        this.floor.mesh.receiveShadow = true;
+        this.simulator.addPlane(this.floor);
+        
+        // Create sphere but don't add to simulator yet
+        this.sphere = new SIMMY.Sphere(new THREE.Vector3(0, -5, 0), 2, this.scene);
+        this.sphere.mesh.receiveShadow = true;
+        this.sphere.mesh.visible = false;
     }
     
     setupLights() {
@@ -51,15 +72,48 @@ class JelloSimulator {
     }
     
     setupScene() {
-        // Add floor plane
-        const floor = new SIMMY.Plane(new THREE.Vector3(0, -2, 0), new THREE.Vector3(0, 1, 0), 20, 20, this.scene);
-        floor.mesh.receiveShadow = true;
-        this.simulator.addPlane(floor);
-        // Add jello cube
         this.jelloCube = new SIMMY.Cube(2.5, 2.5, 2.5, 4, 4, 4, 0, 2, 0, this.scene);
         this.jelloCube.mesh.castShadow = true;
         this.jelloCube.mesh.receiveShadow = true;
         this.simulator.addSpringMesh(this.jelloCube);
+    }
+    
+    switchCollisionType(type) {
+        this.collisionType = type;
+        
+        if (type === 'plane') {
+            // Remove sphere from simulator if it exists
+            const sphereIndex = this.simulator.spheres.indexOf(this.sphere);
+            if (sphereIndex !== -1) {
+                this.simulator.spheres.splice(sphereIndex, 1);
+            }
+            
+            // Add plane to simulator if not already there
+            if (this.simulator.planes.indexOf(this.floor) === -1) {
+                this.simulator.addPlane(this.floor);
+            }
+            
+            // Update visibility
+            this.floor.mesh.visible = true;
+            this.sphere.mesh.visible = false;
+        } else if (type === 'sphere') {
+            // Remove plane from simulator
+            const planeIndex = this.simulator.planes.indexOf(this.floor);
+            if (planeIndex !== -1) {
+                this.simulator.planes.splice(planeIndex, 1);
+            }
+            
+            // Add sphere to simulator if not already there
+            if (this.simulator.spheres.indexOf(this.sphere) === -1) {
+                this.simulator.addSphere(this.sphere);
+            }
+            
+            this.floor.mesh.visible = false;
+            this.sphere.mesh.visible = true;
+        }
+        
+        // Reset jello position
+        this.resetJello();
     }
     
     animate() {
@@ -76,14 +130,17 @@ class JelloSimulator {
         this.controls.update();
         this.renderer.render(this.scene, this.camera);
     }
+    
     onWindowResize() {
         this.camera.aspect = window.innerWidth / window.innerHeight;
         this.camera.updateProjectionMatrix();
         this.renderer.setSize(window.innerWidth, window.innerHeight);
     }
+    
     resetJello() {
         this.jelloCube.reset();
     }
+    
     disturbJello() {
         this.jelloCube.disturb();
     }

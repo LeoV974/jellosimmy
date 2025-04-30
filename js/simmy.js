@@ -5,6 +5,7 @@ SIMMY.Simulator = function(gravity) {
     this.gravity = gravity || new THREE.Vector3(0,-9.8,0);
     this.springMeshes = [];
     this.planes = [];
+    this.spheres = [];
 };
 
 SIMMY.Simulator.prototype.addSpringMesh = function(obj) {
@@ -15,13 +16,17 @@ SIMMY.Simulator.prototype.addPlane = function(obj) {
     this.planes.push(obj);
 };
 
+SIMMY.Simulator.prototype.addSphere = function(obj) {
+    this.spheres.push(obj);
+};
+
 SIMMY.Simulator.prototype.update = function(tdelta) {
     let i;
     for (i = 0; i < this.springMeshes.length; i++) {
         this.springMeshes[i].calcGravity(this.gravity, tdelta);
     }
     for (i = 0; i < this.springMeshes.length; i++) {
-        this.springMeshes[i].calcInfluence(this.planes, tdelta);
+        this.springMeshes[i].calcInfluence(this, tdelta);
     }
 };
 
@@ -86,13 +91,24 @@ SIMMY.SpringMesh.prototype.calcInfluence = function(planes, tdelta) {
         }
     }
 
-    // Check for plane collisions
+    // Check for collisions
     for (let i = 0; i < this.nodes.length; i++) {
         for (let j = 0; j < this.nodes[i].length; j++) {
             for (let k = 0; k < this.nodes[i][j].length; k++) {
                 node = this.nodes[i][j][k];
-                for (let n = 0; n < planes.length; n++) {
-                    const ret = planes[n].nodeBelow(node);
+                
+                // Check plane collisions
+                for (let n = 0; n < planes.planes.length; n++) {
+                    const ret = planes.planes[n].nodeBelow(node);
+                    if (ret.status) {
+                        node.position.copy(ret.proj);
+                        node.velocityVec.set(0,0,0);
+                    }
+                }
+                
+                // Check sphere collisions
+                for (let n = 0; n < planes.spheres.length; n++) {
+                    const ret = planes.spheres[n].nodeBelow(node);
                     if (ret.status) {
                         node.position.copy(ret.proj);
                         node.velocityVec.set(0,0,0);
@@ -228,5 +244,49 @@ SIMMY.Plane.prototype.nodeBelow = function(node) {
         proj: projPoint
     };
 };
+
+SIMMY.Sphere = function(center, radius, scene) {
+    this.center = center || new THREE.Vector3(0,0,0);
+    this.radius = radius || 5;
+    
+    // Create visual representation
+    const geometry = new THREE.SphereGeometry(this.radius, 32, 32);
+    const material = new THREE.MeshPhongMaterial({
+        color: 0x666666,
+        side: THREE.DoubleSide,
+        wireframe: false,
+        transparent: true,
+        opacity: 0.3
+    });
+    
+    this.mesh = new THREE.Mesh(geometry, material);
+    this.mesh.position.copy(this.center);
+    
+    if (scene) scene.add(this.mesh);
+};
+
+SIMMY.Sphere.prototype.nodeBelow = function(node) {
+    const nodeToCenter = node.position.clone().sub(this.center);
+    const distance = nodeToCenter.length();
+    
+    if (distance < this.radius) {
+        // Node is inside sphere, project it to the surface
+        const direction = nodeToCenter.normalize();
+        const projPoint = this.center.clone().add(direction.multiplyScalar(this.radius));
+        
+        return {
+            status: true,
+            proj: projPoint
+        };
+    }
+    
+    return {
+        status: false,
+        proj: node.position.clone()
+    };
+};
+
+
+
 
 export { SIMMY };
