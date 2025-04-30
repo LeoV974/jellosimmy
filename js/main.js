@@ -139,8 +139,8 @@ class JelloSimulator {
             for (let i = 0; i < this.debugPoints.length; i++) {
                 this.debugPoints[i].mesh.position.copy(this.debugPoints[i].node.position);
             }
-            this.toggleDebugVisuals();
-            this.toggleDebugVisuals();
+            this.disableDebugVisuals();
+            this.enableDebugVisuals();
         }
         
     }
@@ -182,14 +182,15 @@ JelloSimulator.prototype.disableDebugVisuals = function() {
 };
 
 JelloSimulator.prototype.toggleDebugVisuals = function() {
-    if (this.debugVisualsEnabled && this.animateDebug) {
-        this.disableDebugVisuals();
-    } else if (this.debugVisualsEnabled) {
-        this.animateDebug = true;
-    } else {
+    if (!this.debugVisualsEnabled) {
         this.enableDebugVisuals();
-        this.animateDebug = false;
+        this.animateDebug = true;
         this.debugVisualsEnabled = true;
+    } else if (this.animateDebug) {
+        this.animateDebug = false;
+    } else {
+        this.disableDebugVisuals();
+        this.debugVisualsEnabled = false;
     }
 };
 
@@ -261,6 +262,20 @@ JelloSimulator.prototype.visualizeSprings = function() {
             }
         }
     }
+};
+
+JelloSimulator.prototype.setElasticity = function(value) {
+    // Update elasticity for all planes
+    for (let i = 0; i < this.simulator.planes.length; i++) {
+        this.simulator.planes[i].elasticity = value;
+    }
+    
+    // Update elasticity for all spheres
+    for (let i = 0; i < this.simulator.spheres.length; i++) {
+        this.simulator.spheres[i].elasticity = value;
+    }
+    
+    console.log(`Set elasticity to ${value}`);
 };
 
 
