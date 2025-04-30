@@ -16,7 +16,7 @@ class JelloSimulator {
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
         this.controls.enableDamping = true;
         this.controls.dampingFactor = 0.05;
-        this.simulator = new SIMMY.Simulator(new THREE.Vector3(0, -2.5, 0));
+        this.simulator = new SIMMY.Simulator(new THREE.Vector3(0, -9.8, 0));
         this.setupLights();
         
         // Initialize collision objects first
@@ -31,6 +31,7 @@ class JelloSimulator {
         window.addEventListener('resize', this.onWindowResize);
         document.getElementById('reset').addEventListener('click', this.resetJello);
         document.getElementById('disturb').addEventListener('click', this.disturbJello);
+        document.getElementById('debug-toggle').addEventListener('click', () => this.toggleDebugVisuals());
         
         document.getElementById('collisionType').addEventListener('change', (e) => {
             this.switchCollisionType(e.target.value);
@@ -39,6 +40,8 @@ class JelloSimulator {
         // Start animation loop
         this.lastTime = Date.now();
         this.animate();
+        this.setupDebugControls();
+        this.enableDebugVisuals();
     }
     
     initCollisionObjects() {
@@ -72,7 +75,7 @@ class JelloSimulator {
     }
     
     setupScene() {
-        this.jelloCube = new SIMMY.Cube(2.5, 2.5, 2.5, 8, 8, 8, 0, 2, 0, this.scene);
+        this.jelloCube = new SIMMY.Cube(2.5, 2.5, 2.5, 4, 4, 4, 0, 2, 0, this.scene);
         this.jelloCube.mesh.castShadow = true;
         this.jelloCube.mesh.receiveShadow = true;
         this.simulator.addSpringMesh(this.jelloCube);
@@ -129,6 +132,17 @@ class JelloSimulator {
         this.jelloCube.updateGeometry();
         this.controls.update();
         this.renderer.render(this.scene, this.camera);
+        // Add this to your animate function to update debug visuals
+        // Place this code at the end of your animate method before rendering
+        // Update debug visuals if enabled
+        if (this.debugVisualsEnabled && this.debugPoints && this.animateDebug) {
+            for (let i = 0; i < this.debugPoints.length; i++) {
+                this.debugPoints[i].mesh.position.copy(this.debugPoints[i].node.position);
+            }
+            this.toggleDebugVisuals();
+            this.toggleDebugVisuals();
+        }
+        
     }
     
     onWindowResize() {
@@ -145,6 +159,110 @@ class JelloSimulator {
         this.jelloCube.disturb();
     }
 }
+
+// DEBUG VISUALIZATION
+JelloSimulator.prototype.enableDebugVisuals = function() {
+    if (this.debugObjects) this.scene.remove(this.debugObjects); // clear debug
+    
+    this.debugObjects = new THREE.Group(); // contains debug springs and nodes
+    this.scene.add(this.debugObjects);
+    
+    this.visualizePoints();
+    this.visualizeSprings();
+    this.debugVisualsEnabled = true;
+};
+
+JelloSimulator.prototype.disableDebugVisuals = function() {
+    if (this.debugObjects) {
+        this.scene.remove(this.debugObjects);
+        this.debugObjects = null;
+        this.debugPoints = [];
+    }
+    this.debugVisualsEnabled = false;
+};
+
+JelloSimulator.prototype.toggleDebugVisuals = function() {
+    if (this.debugVisualsEnabled && this.animateDebug) {
+        this.disableDebugVisuals();
+    } else if (this.debugVisualsEnabled) {
+        this.animateDebug = true;
+    } else {
+        this.enableDebugVisuals();
+        this.animateDebug = false;
+        this.debugVisualsEnabled = true;
+    }
+};
+
+JelloSimulator.prototype.visualizePoints = function () {
+    this.debugPoints = [];
+    const nodeMaterial = new THREE.MeshBasicMaterial({ color: 0x0000ff });
+    const nodeGeometry = new THREE.SphereGeometry(0.05, 8, 8); // sphere per node
+    
+
+    for (let i = 0; i < this.jelloCube.nodes.length; i++) {
+        for (let j = 0; j < this.jelloCube.nodes[i].length; j++) {
+            for (let k = 0; k < this.jelloCube.nodes[i][j].length; k++) {
+                const node = this.jelloCube.nodes[i][j][k];
+                let material;
+                material = nodeMaterial;
+                const nodeSphere = new THREE.Mesh(nodeGeometry, material);
+                nodeSphere.position.copy(node.position);
+                this.debugObjects.add(nodeSphere);
+                this.debugPoints.push({
+                    node: node,
+                    mesh: nodeSphere
+                });
+            }
+        }
+    }
+
+}
+
+JelloSimulator.prototype.visualizeSprings = function() {
+    if (!this.debugObjects) return;
+    const springMaterial = new THREE.LineBasicMaterial({ 
+        color: 0xffff00,
+        transparent: true,
+        opacity: 0.3
+    });
+    const visualizedSprings = new Set(); // avoid duplicates
+
+    for (let i = 0; i < this.jelloCube.nodes.length; i++) {
+        for (let j = 0; j < this.jelloCube.nodes[i].length; j++) {
+            for (let k = 0; k < this.jelloCube.nodes[i][j].length; k++) {
+                const node = this.jelloCube.nodes[i][j][k];
+                
+                // Visualize all linear springs for this node
+                for (let s = 0; s < node.linearSprings.length; s++) {
+                    const spring = node.linearSprings[s];
+                    
+                    // Create unique key for this spring to avoid duplicates
+                    const key1 = `${spring.node1.position.x},${spring.node1.position.y},${spring.node1.position.z}-${spring.node2.position.x},${spring.node2.position.y},${spring.node2.position.z}`;
+                    const key2 = `${spring.node2.position.x},${spring.node2.position.y},${spring.node2.position.z}-${spring.node1.position.x},${spring.node1.position.y},${spring.node1.position.z}`;
+                    
+                    // Skip if already visualized
+                    if (visualizedSprings.has(key1) || visualizedSprings.has(key2)) {
+                        continue;
+                    }
+                    
+                    // Mark as visualized
+                    visualizedSprings.add(key1);
+                    
+                    // Create line geometry for this spring
+                    const points = [
+                        spring.node1.position,
+                        spring.node2.position
+                    ];
+                    
+                    const geometry = new THREE.BufferGeometry().setFromPoints(points);
+                    const line = new THREE.Line(geometry, springMaterial);
+                    this.debugObjects.add(line);
+                }
+            }
+        }
+    }
+};
+
 
 document.addEventListener('DOMContentLoaded', () => {
     const app = new JelloSimulator();
