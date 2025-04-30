@@ -115,24 +115,42 @@ SIMMY.Cube = function(xSize, ySize, zSize, xNodes, yNodes, zNodes, x, y, z, scen
                 
                 const kFaceDiag = 0.7 * kLinearSpring;
                 // In-plane diagonal springs for better shape retention
+
+                // Add diagonals in XY plane
                 const XYdiagLength = Math.sqrt(diffX*diffX + diffY*diffY);
                 if (i > 0 && j > 0) {
-                    // Add diagonal in XY plane
                     linearSpring = new SIMMY.LinearSpring(node, nodesDict[(i-1)+"_"+(j-1)+"_"+k], 
                         XYdiagLength, kFaceDiag);
                     node.addSpring(linearSpring);
                 }
+                if (i < xNodes - 1 && j < yNodes - 1) {
+                    linearSpring = new SIMMY.LinearSpring(node, nodesDict[(i+1)+"_"+(j+1)+"_"+k], 
+                        XYdiagLength, kFaceDiag);
+                    node.addSpring(linearSpring);
+                }
+
+                // Add diagonals in XZ plane
                 const XZdiagLength = Math.sqrt(diffX*diffX + diffZ*diffZ);
                 if (i > 0 && k > 0) {
-                    // Add diagonal in XZ plane
                     linearSpring = new SIMMY.LinearSpring(node, nodesDict[(i-1)+"_"+j+"_"+(k-1)], 
                         XZdiagLength, kFaceDiag);
                     node.addSpring(linearSpring);
                 }
+                if (i < xNodes - 1 && k < zNodes - 1) {
+                    linearSpring = new SIMMY.LinearSpring(node, nodesDict[(i+1)+"_"+j+"_"+(k+1)], 
+                        XZdiagLength, kFaceDiag);
+                    node.addSpring(linearSpring);
+                }
+
+                // Add diagonals in YZ plane
                 const YZdiagLength = Math.sqrt(diffY*diffY + diffZ*diffZ);
                 if (j > 0 && k > 0) {
-                    // Add diagonal in YZ plane
                     linearSpring = new SIMMY.LinearSpring(node, nodesDict[i+"_"+(j-1)+"_"+(k-1)], 
+                        YZdiagLength, kFaceDiag);
+                    node.addSpring(linearSpring);
+                }
+                if (j < yNodes - 1 && k < yNodes - 1) {
+                    linearSpring = new SIMMY.LinearSpring(node, nodesDict[i+"_"+(j+1)+"_"+(k+1)], 
                         YZdiagLength, kFaceDiag);
                     node.addSpring(linearSpring);
                 }
