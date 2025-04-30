@@ -123,8 +123,8 @@ SIMMY.Cube = function(xSize, ySize, zSize, xNodes, yNodes, zNodes, x, y, z, scen
                         XYdiagLength, kFaceDiag);
                     node.addSpring(linearSpring);
                 }
-                if (i < xNodes - 1 && j < yNodes - 1) {
-                    linearSpring = new SIMMY.LinearSpring(node, nodesDict[(i+1)+"_"+(j+1)+"_"+k], 
+                if (i > 0 && j < yNodes - 1) {
+                    linearSpring = new SIMMY.LinearSpring(node, nodesDict[(i-1)+"_"+(j+1)+"_"+k], 
                         XYdiagLength, kFaceDiag);
                     node.addSpring(linearSpring);
                 }
@@ -136,8 +136,8 @@ SIMMY.Cube = function(xSize, ySize, zSize, xNodes, yNodes, zNodes, x, y, z, scen
                         XZdiagLength, kFaceDiag);
                     node.addSpring(linearSpring);
                 }
-                if (i < xNodes - 1 && k < zNodes - 1) {
-                    linearSpring = new SIMMY.LinearSpring(node, nodesDict[(i+1)+"_"+j+"_"+(k+1)], 
+                if (i > 0 && k < zNodes - 1) {
+                    linearSpring = new SIMMY.LinearSpring(node, nodesDict[(i-1)+"_"+j+"_"+(k+1)], 
                         XZdiagLength, kFaceDiag);
                     node.addSpring(linearSpring);
                 }
@@ -149,8 +149,8 @@ SIMMY.Cube = function(xSize, ySize, zSize, xNodes, yNodes, zNodes, x, y, z, scen
                         YZdiagLength, kFaceDiag);
                     node.addSpring(linearSpring);
                 }
-                if (j < yNodes - 1 && k < yNodes - 1) {
-                    linearSpring = new SIMMY.LinearSpring(node, nodesDict[i+"_"+(j+1)+"_"+(k+1)], 
+                if (j > 0 && k < yNodes - 1) {
+                    linearSpring = new SIMMY.LinearSpring(node, nodesDict[i+"_"+(j-1)+"_"+(k+1)], 
                         YZdiagLength, kFaceDiag);
                     node.addSpring(linearSpring);
                 }
@@ -184,24 +184,26 @@ SIMMY.Cube = function(xSize, ySize, zSize, xNodes, yNodes, zNodes, x, y, z, scen
                         cubeDiagLength, kBodyDiag);
                     node.addSpring(linearSpring);
                 }
-                // +1, -1, -1
-                if (i < xNodes-1 && j > 0 && k > 0) {
-                    linearSpring = new SIMMY.LinearSpring(node, nodesDict[(i+1)+"_"+(j-1)+"_"+(k-1)], 
-                        cubeDiagLength, kBodyDiag);
-                    node.addSpring(linearSpring);
-                }
-                // +1, +1, -1
-                if (i < xNodes-1 && j < yNodes - 1 && k > 0) {
-                    linearSpring = new SIMMY.LinearSpring(node, nodesDict[(i+1)+"_"+(j+1)+"_"+(k-1)], 
-                        cubeDiagLength, kBodyDiag);
-                    node.addSpring(linearSpring);
-                }
-                // +1, +1, +1
-                if (i < xNodes-1 && j < yNodes-1 && k < zNodes-1) {
-                    linearSpring = new SIMMY.LinearSpring(node, nodesDict[(i+1)+"_"+(j+1)+"_"+(k+1)], 
-                        cubeDiagLength, kBodyDiag);
-                    node.addSpring(linearSpring);
-                }
+                // oops those were duplicates
+                // // +1, -1, -1
+                // if (i < xNodes-1 && j > 0 && k > 0) {
+                //     linearSpring = new SIMMY.LinearSpring(node, nodesDict[(i+1)+"_"+(j-1)+"_"+(k-1)], 
+                //         cubeDiagLength, kBodyDiag);
+                //     node.addSpring(linearSpring);
+                // }
+                // // +1, -1, +1
+                // // +1, +1, -1
+                // if (i < xNodes-1 && j < yNodes - 1 && k > 0) {
+                //     linearSpring = new SIMMY.LinearSpring(node, nodesDict[(i+1)+"_"+(j+1)+"_"+(k-1)], 
+                //         cubeDiagLength, kBodyDiag);
+                //     node.addSpring(linearSpring);
+                // }
+                // // +1, +1, +1
+                // if (i < xNodes-1 && j < yNodes-1 && k < zNodes-1) {
+                //     linearSpring = new SIMMY.LinearSpring(node, nodesDict[(i+1)+"_"+(j+1)+"_"+(k+1)], 
+                //         cubeDiagLength, kBodyDiag);
+                //     node.addSpring(linearSpring);
+                // }
                 
                 // replaced these with bending (2nd neighbor) springs
                 // Angle springs to maintain cube shape
