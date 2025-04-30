@@ -103,34 +103,32 @@ class JelloSimulator {
             }),
 
             crystal: new THREE.MeshPhysicalMaterial({
-                color: 0x88ccff,       // Light blue color
-                metalness: 0.0,        // Non-metallic
-                roughness: 0.0,        // Perfectly smooth
-                transmission: 0.95,    // High transparency
+                color: 0x88ccff,
+                metalness: 0.0,
+                roughness: 0.0,
+                transmission: 0.95,
                 transparent: true,
                 opacity: 0.7,
                 side: THREE.DoubleSide,
-                envMap: envMap,        // Environment map for reflections
-                envMapIntensity: 1.5,  // Strong reflections
-                clearcoat: 0.8,        // Glossy surface
+                envMap: envMap,
+                envMapIntensity: 1.5,
+                clearcoat: 0.8,
                 clearcoatRoughness: 0.2,
-                ior: 2.33,             // High Index of Refraction for crystal
-                reflectivity: 0.8      // High reflectivity
+                ior: 2.33,
+                reflectivity: 0.8
             }),
             
-            // Improved mirror material
             mirror: new THREE.MeshStandardMaterial({
-                color: 0xf0f0f0,       // Slight off-white for realism
-                metalness: 1.0,        // Fully metallic for mirror effect
-                roughness: 0.05,       // Slightly rough for better realism
-                envMap: envMap,        // Environment map for reflections
-                envMapIntensity: 1.5,  // Stronger reflections
+                color: 0xf0f0f0,
+                metalness: 1.0,
+                roughness: 0.05,
+                envMap: envMap,
+                envMapIntensity: 1.5,
                 side: THREE.DoubleSide
             }),
-            
-            // Basic material - added proper color
+
             material: new THREE.MeshPhongMaterial({
-                color: 0x2194ce,       // Nice blue color
+                color: 0x2194ce,
                 shininess: 30,
                 side: THREE.DoubleSide
             })
@@ -262,8 +260,7 @@ class JelloSimulator {
     
     resetJello() {
         this.jelloCube.reset();
-        
-        // Make sure to apply the current material type after reset
+
         if (this.currentMaterialType && this.materialPresets[this.currentMaterialType]) {
             this.jelloCube.mesh.material = this.materialPresets[this.currentMaterialType].clone();
         }
