@@ -128,7 +128,7 @@ SIMMY.SpringNode = function(position, mass) {
 };
 
 SIMMY.SpringNode.prototype.addSpring = function(spring) {
-    if (spring instanceof SIMMY.LinearSpring) {
+    if (spring instanceof SIMMY.Spring) {
         this.linearSprings.push(spring);
     } else if (spring instanceof SIMMY.AngleSpring) {
         this.angleSprings.push(spring);
@@ -161,14 +161,14 @@ SIMMY.SpringNode.prototype.sendInfluence = function(tdelta) {
     }
 };
 
-SIMMY.LinearSpring = function(node1, node2, length, k) {
+SIMMY.Spring = function(node1, node2, length, k) {
     this.node1 = node1;
     this.node2 = node2;
     this.length = length;
     this.k = k;
 };
 
-SIMMY.LinearSpring.prototype.calcForce = function(tdelta) {
+SIMMY.Spring.prototype.calcForce = function(tdelta) {
     const dir = this.node2.position.clone().sub(this.node1.position).normalize();
     const newLength = this.node2.position.clone().sub(this.node1.position).length();
     const lenDiff = this.length - newLength;

@@ -7,7 +7,7 @@ SIMMY.Cube = function(xSize, ySize, zSize, xNodes, yNodes, zNodes, x, y, z, scen
     const geometry = new THREE.BufferGeometry();
     
     // Spring constants for the jello behavior
-    const kLinearSpring = 10;  // Linear spring strength
+    const kLinearSpring = 50;  // Linear spring strength
     // const kAngleSpring = 10;   // Angle spring strength
     const nodesDict = {};
     
@@ -40,170 +40,174 @@ SIMMY.Cube = function(xSize, ySize, zSize, xNodes, yNodes, zNodes, x, y, z, scen
         for (j = 0; j < yNodes; j++) {
             for (k = 0; k < zNodes; k++) {
                 node = nodesDict[i+"_"+j+"_"+k];
-                let linearSpring;
+                let s;
                 const linearSprings = {};
                 const kBending = 0.2 * kLinearSpring;
                 
                 // X-axis springs
                 if (i > 0) { // -x
-                    linearSpring = new SIMMY.LinearSpring(node, nodesDict[(i-1)+"_"+j+"_"+k], diffX, kLinearSpring);
-                    node.addSpring(linearSpring);
-                    linearSprings['-x'] = linearSpring;
+                    s = new SIMMY.Spring(node, nodesDict[(i-1)+"_"+j+"_"+k], diffX, kLinearSpring);
+                    node.addSpring(s);
+                    linearSprings['-x'] = s;
                 }
                 if (i < xNodes-1) { //+x
-                    linearSpring = new SIMMY.LinearSpring(node, nodesDict[(i+1)+"_"+j+"_"+k], diffX, kLinearSpring);
-                    node.addSpring(linearSpring);
-                    linearSprings['+x'] = linearSpring;
+                    s = new SIMMY.Spring(node, nodesDict[(i+1)+"_"+j+"_"+k], diffX, kLinearSpring);
+                    node.addSpring(s);
+                    linearSprings['+x'] = s;
                 }
                 // X-axis bending springs (2nd neighbor)
                 if (i > 1) { // -2x
-                    linearSpring = new SIMMY.LinearSpring(node, nodesDict[(i-2)+"_"+j+"_"+k], 2 * diffX, kBending);
-                    node.addSpring(linearSpring);
-                    linearSprings['-2x'] = linearSpring;
+                    s = new SIMMY.Spring(node, nodesDict[(i-2)+"_"+j+"_"+k], 2 * diffX, kBending);
+                    node.addSpring(s);
+                    linearSprings['-2x'] = s;
                 }
                 if (i < xNodes-2) { //+2x
-                    linearSpring = new SIMMY.LinearSpring(node, nodesDict[(i+2)+"_"+j+"_"+k], 2 * diffX, kBending);
-                    node.addSpring(linearSpring);
-                    linearSprings['+2x'] = linearSpring;
+                    s = new SIMMY.Spring(node, nodesDict[(i+2)+"_"+j+"_"+k], 2 * diffX, kBending);
+                    node.addSpring(s);
+                    linearSprings['+2x'] = s;
                 }
                 
                 // Y-axis springs
                 if (j > 0) { //-y
-                    linearSpring = new SIMMY.LinearSpring(node, nodesDict[i+"_"+(j-1)+"_"+k], diffY, kLinearSpring);
-                    node.addSpring(linearSpring);
-                    linearSprings['-y'] = linearSpring;
+                    s = new SIMMY.Spring(node, nodesDict[i+"_"+(j-1)+"_"+k], diffY, kLinearSpring);
+                    node.addSpring(s);
+                    linearSprings['-y'] = s;
                 }
                 if (j < yNodes-1) { //+y
-                    linearSpring = new SIMMY.LinearSpring(node, nodesDict[i+"_"+(j+1)+"_"+k], diffY, kLinearSpring);
-                    node.addSpring(linearSpring);
-                    linearSprings['+y'] = linearSpring;
+                    s = new SIMMY.Spring(node, nodesDict[i+"_"+(j+1)+"_"+k], diffY, kLinearSpring);
+                    node.addSpring(s);
+                    linearSprings['+y'] = s;
                 }
                 // Y-axis bending springs
                 if (j > 1) { //-2y
-                    linearSpring = new SIMMY.LinearSpring(node, nodesDict[i+"_"+(j-2)+"_"+k], 2 * diffY, kBending);
-                    node.addSpring(linearSpring);
-                    linearSprings['-2y'] = linearSpring;
+                    s = new SIMMY.Spring(node, nodesDict[i+"_"+(j-2)+"_"+k], 2 * diffY, kBending);
+                    node.addSpring(s);
+                    linearSprings['-2y'] = s;
                 }
                 if (j < yNodes-2) { //+2y
-                    linearSpring = new SIMMY.LinearSpring(node, nodesDict[i+"_"+(j+2)+"_"+k], 2 * diffY, kBending);
-                    node.addSpring(linearSpring);
-                    linearSprings['+2y'] = linearSpring;
+                    s = new SIMMY.Spring(node, nodesDict[i+"_"+(j+2)+"_"+k], 2 * diffY, kBending);
+                    node.addSpring(s);
+                    linearSprings['+2y'] = s;
                 }
                 
                 // Z-axis springs
                 if (k > 0) { //-z
-                    linearSpring = new SIMMY.LinearSpring(node, nodesDict[i+"_"+j+"_"+(k-1)], diffZ, kLinearSpring);
-                    node.addSpring(linearSpring);
-                    linearSprings['-z'] = linearSpring;
+                    s = new SIMMY.Spring(node, nodesDict[i+"_"+j+"_"+(k-1)], diffZ, kLinearSpring);
+                    node.addSpring(s);
+                    linearSprings['-z'] = s;
                 }
                 if (k < zNodes-1) { //+z
-                    linearSpring = new SIMMY.LinearSpring(node, nodesDict[i+"_"+j+"_"+(k+1)], diffZ, kLinearSpring);
-                    node.addSpring(linearSpring);
-                    linearSprings['+z'] = linearSpring;
+                    s = new SIMMY.Spring(node, nodesDict[i+"_"+j+"_"+(k+1)], diffZ, kLinearSpring);
+                    node.addSpring(s);
+                    linearSprings['+z'] = s;
                 }
                 // Z-axis bending springs
                 if (k > 1) { //-z
-                    linearSpring = new SIMMY.LinearSpring(node, nodesDict[i+"_"+j+"_"+(k-2)], 2 * diffZ, kBending);
-                    node.addSpring(linearSpring);
-                    linearSprings['-2z'] = linearSpring;
+                    s = new SIMMY.Spring(node, nodesDict[i+"_"+j+"_"+(k-2)], 2 * diffZ, kBending);
+                    node.addSpring(s);
+                    linearSprings['-2z'] = s;
                 }
                 if (k < zNodes-2) { //+z
-                    linearSpring = new SIMMY.LinearSpring(node, nodesDict[i+"_"+j+"_"+(k+2)], 2 * diffZ, kBending);
-                    node.addSpring(linearSpring);
-                    linearSprings['+2z'] = linearSpring;
+                    s = new SIMMY.Spring(node, nodesDict[i+"_"+j+"_"+(k+2)], 2 * diffZ, kBending);
+                    node.addSpring(s);
+                    linearSprings['+2z'] = s;
                 }
                 
-                const kFaceDiag = 0.7 * kLinearSpring;
+                const kFaceDiag = 2 * kLinearSpring;
                 // In-plane diagonal springs for better shape retention
 
                 // Add diagonals in XY plane
                 const XYdiagLength = Math.sqrt(diffX*diffX + diffY*diffY);
                 if (i > 0 && j > 0) {
-                    linearSpring = new SIMMY.LinearSpring(node, nodesDict[(i-1)+"_"+(j-1)+"_"+k], 
+                    s = new SIMMY.Spring(node, nodesDict[(i-1)+"_"+(j-1)+"_"+k], 
                         XYdiagLength, kFaceDiag);
-                    node.addSpring(linearSpring);
+                    node.addSpring(s);
                 }
                 if (i > 0 && j < yNodes - 1) {
-                    linearSpring = new SIMMY.LinearSpring(node, nodesDict[(i-1)+"_"+(j+1)+"_"+k], 
+                    s = new SIMMY.Spring(node, nodesDict[(i-1)+"_"+(j+1)+"_"+k], 
                         XYdiagLength, kFaceDiag);
-                    node.addSpring(linearSpring);
+                    node.addSpring(s);
                 }
 
                 // Add diagonals in XZ plane
                 const XZdiagLength = Math.sqrt(diffX*diffX + diffZ*diffZ);
                 if (i > 0 && k > 0) {
-                    linearSpring = new SIMMY.LinearSpring(node, nodesDict[(i-1)+"_"+j+"_"+(k-1)], 
+                    s = new SIMMY.Spring(node, nodesDict[(i-1)+"_"+j+"_"+(k-1)], 
                         XZdiagLength, kFaceDiag);
-                    node.addSpring(linearSpring);
+                    node.addSpring(s);
                 }
                 if (i > 0 && k < zNodes - 1) {
-                    linearSpring = new SIMMY.LinearSpring(node, nodesDict[(i-1)+"_"+j+"_"+(k+1)], 
+                    s = new SIMMY.Spring(node, nodesDict[(i-1)+"_"+j+"_"+(k+1)], 
                         XZdiagLength, kFaceDiag);
-                    node.addSpring(linearSpring);
+                    node.addSpring(s);
                 }
 
                 // Add diagonals in YZ plane
                 const YZdiagLength = Math.sqrt(diffY*diffY + diffZ*diffZ);
                 if (j > 0 && k > 0) {
-                    linearSpring = new SIMMY.LinearSpring(node, nodesDict[i+"_"+(j-1)+"_"+(k-1)], 
+                    s = new SIMMY.Spring(node, nodesDict[i+"_"+(j-1)+"_"+(k-1)], 
                         YZdiagLength, kFaceDiag);
-                    node.addSpring(linearSpring);
+                    node.addSpring(s);
                 }
                 if (j > 0 && k < yNodes - 1) {
-                    linearSpring = new SIMMY.LinearSpring(node, nodesDict[i+"_"+(j-1)+"_"+(k+1)], 
+                    s = new SIMMY.Spring(node, nodesDict[i+"_"+(j-1)+"_"+(k+1)], 
                         YZdiagLength, kFaceDiag);
-                    node.addSpring(linearSpring);
+                    node.addSpring(s);
                 }
 
                 // Cross bracing springs for additional stability
                 // (diagonals between opposite vertices of a cube)
                 // there are 4 of these in a cube, and 8 per vertex
                 const cubeDiagLength = Math.sqrt(diffX*diffX + diffY*diffY + diffZ*diffZ);
-                const kBodyDiag = kLinearSpring; // can adjust this later
+                const kBodyDiag = 2 * kLinearSpring; // can adjust this later
                 // -1, -1, -1
                 if (i > 0 && j > 0 && k > 0) {
-                    linearSpring = new SIMMY.LinearSpring(node, nodesDict[(i-1)+"_"+(j-1)+"_"+(k-1)], 
+                    s = new SIMMY.Spring(node, nodesDict[(i-1)+"_"+(j-1)+"_"+(k-1)], 
                         cubeDiagLength, kBodyDiag);
-                    node.addSpring(linearSpring);
+                    node.addSpring(s);
                 }
                 // -1, -1, +1
                 if (i > 0 && j > 0 && k < zNodes - 1) {
-                    linearSpring = new SIMMY.LinearSpring(node, nodesDict[(i-1)+"_"+(j-1)+"_"+(k+1)], 
+                    s = new SIMMY.Spring(node, nodesDict[(i-1)+"_"+(j-1)+"_"+(k+1)], 
                         cubeDiagLength, kBodyDiag);
-                    node.addSpring(linearSpring);
+                    node.addSpring(s);
                 }
                 // -1, +1, -1
                 if (i > 0 && j < yNodes - 1 && k > 0) {
-                    linearSpring = new SIMMY.LinearSpring(node, nodesDict[(i-1)+"_"+(j+1)+"_"+(k-1)], 
+                    s = new SIMMY.Spring(node, nodesDict[(i-1)+"_"+(j+1)+"_"+(k-1)], 
                         cubeDiagLength, kBodyDiag);
-                    node.addSpring(linearSpring);
+                    node.addSpring(s);
                 }
                 // -1, +1, +1
                 if (i > 0 && j < yNodes - 1 && k < zNodes - 1) {
-                    linearSpring = new SIMMY.LinearSpring(node, nodesDict[(i-1)+"_"+(j+1)+"_"+(k+1)], 
+                    s = new SIMMY.Spring(node, nodesDict[(i-1)+"_"+(j+1)+"_"+(k+1)], 
                         cubeDiagLength, kBodyDiag);
-                    node.addSpring(linearSpring);
+                    node.addSpring(s);
                 }
-                // oops those were duplicates
-                // // +1, -1, -1
-                // if (i < xNodes-1 && j > 0 && k > 0) {
-                //     linearSpring = new SIMMY.LinearSpring(node, nodesDict[(i+1)+"_"+(j-1)+"_"+(k-1)], 
-                //         cubeDiagLength, kBodyDiag);
-                //     node.addSpring(linearSpring);
-                // }
-                // // +1, -1, +1
-                // // +1, +1, -1
-                // if (i < xNodes-1 && j < yNodes - 1 && k > 0) {
-                //     linearSpring = new SIMMY.LinearSpring(node, nodesDict[(i+1)+"_"+(j+1)+"_"+(k-1)], 
-                //         cubeDiagLength, kBodyDiag);
-                //     node.addSpring(linearSpring);
-                // }
-                // // +1, +1, +1
-                // if (i < xNodes-1 && j < yNodes-1 && k < zNodes-1) {
-                //     linearSpring = new SIMMY.LinearSpring(node, nodesDict[(i+1)+"_"+(j+1)+"_"+(k+1)], 
-                //         cubeDiagLength, kBodyDiag);
-                //     node.addSpring(linearSpring);
-                // }
+                // +1, -1, -1
+                if (i < xNodes-1 && j > 0 && k > 0) {
+                    s = new SIMMY.Spring(node, nodesDict[(i+1)+"_"+(j-1)+"_"+(k-1)], 
+                        cubeDiagLength, kBodyDiag);
+                    node.addSpring(s);
+                }
+                // +1, -1, +1
+                if (i < xNodes - 1 && j > 0 && k < zNodes - 1) {
+                    s = new SIMMY.Spring(node, nodesDict[(i+1)+"_"+(j-1)+"_"+(k+1)], 
+                        cubeDiagLength, kBodyDiag);
+                    node.addSpring(s);
+                }
+                // +1, +1, -1
+                if (i < xNodes-1 && j < yNodes - 1 && k > 0) {
+                    s = new SIMMY.Spring(node, nodesDict[(i+1)+"_"+(j+1)+"_"+(k-1)], 
+                        cubeDiagLength, kBodyDiag);
+                    node.addSpring(s);
+                }
+                // +1, +1, +1
+                if (i < xNodes-1 && j < yNodes-1 && k < zNodes-1) {
+                    s = new SIMMY.Spring(node, nodesDict[(i+1)+"_"+(j+1)+"_"+(k+1)], 
+                        cubeDiagLength, kBodyDiag);
+                    node.addSpring(s);
+                }
                 
                 // replaced these with bending (2nd neighbor) springs
                 // Angle springs to maintain cube shape
