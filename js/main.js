@@ -54,6 +54,7 @@ class JelloSimulator {
         this.enableDebugVisuals();
     }
 
+    //diff materials
     setupMaterialPresets() {
         // Create environment map for crystal and mirror materials
         const cubeTextureLoader = new THREE.CubeTextureLoader();
