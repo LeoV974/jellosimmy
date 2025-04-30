@@ -7,8 +7,8 @@ SIMMY.Cube = function(xSize, ySize, zSize, xNodes, yNodes, zNodes, x, y, z, scen
     const geometry = new THREE.BufferGeometry();
     
     // Spring constants for the jello behavior
-    const kLinearSpring = 5.5;  // Linear spring strength
-    const kAngleSpring = 8;   // Angle spring strength
+    const kLinearSpring = 20.5;  // Linear spring strength
+    const kAngleSpring = 10;   // Angle spring strength
     const nodesDict = {};
     
     const startX = x - xSize/2;
@@ -113,34 +113,40 @@ SIMMY.Cube = function(xSize, ySize, zSize, xNodes, yNodes, zNodes, x, y, z, scen
                 }
                 
                 // In-plane diagonal springs for better shape retention
+                const XYdiagLength = Math.sqrt(diffX*diffX + diffY*diffY);
                 if (i > 0 && j > 0) {
                     // Add diagonal in XY plane
                     linearSpring = new SIMMY.LinearSpring(node, nodesDict[(i-1)+"_"+(j-1)+"_"+k], 
-                        Math.sqrt(diffX*diffX + diffY*diffY), kLinearSpring * 0.7);
+                        XYdiagLength, kLinearSpring * 0.7);
                     node.addSpring(linearSpring);
                 }
+                const XZdiagLength = Math.sqrt(diffX*diffX + diffZ*diffZ);
                 if (i > 0 && k > 0) {
                     // Add diagonal in XZ plane
                     linearSpring = new SIMMY.LinearSpring(node, nodesDict[(i-1)+"_"+j+"_"+(k-1)], 
-                        Math.sqrt(diffX*diffX + diffZ*diffZ), kLinearSpring * 0.7);
+                        XZdiagLength, kLinearSpring * 0.7);
                     node.addSpring(linearSpring);
                 }
+                const YZdiagLength = Math.sqrt(diffY*diffY + diffZ*diffZ);
                 if (j > 0 && k > 0) {
                     // Add diagonal in YZ plane
                     linearSpring = new SIMMY.LinearSpring(node, nodesDict[i+"_"+(j-1)+"_"+(k-1)], 
-                        Math.sqrt(diffY*diffY + diffZ*diffZ), kLinearSpring * 0.7);
+                        YZdiagLength, kLinearSpring * 0.7);
                     node.addSpring(linearSpring);
                 }
 
                 // Cross bracing springs for additional stability
+                // (diagonals between opposite vertices of a cube)
+                // there are 4 of these in a cube, and 8 per vertex
+                const cubeDiagLength = Math.sqrt(diffX*diffX + diffY*diffY + diffZ*diffZ);
                 if (i > 0 && j > 0 && k > 0) {
                     linearSpring = new SIMMY.LinearSpring(node, nodesDict[(i-1)+"_"+(j-1)+"_"+(k-1)], 
-                        Math.sqrt(diffX*diffX + diffY*diffY + diffZ*diffZ), kLinearSpring * 1.2);
+                        cubeDiagLength, kLinearSpring * 1.2);
                     node.addSpring(linearSpring);
                 }
                 if (i < xNodes-1 && j < yNodes-1 && k < zNodes-1) {
                     linearSpring = new SIMMY.LinearSpring(node, nodesDict[(i+1)+"_"+(j+1)+"_"+(k+1)], 
-                        Math.sqrt(diffX*diffX + diffY*diffY + diffZ*diffZ), kLinearSpring * 1.2);
+                        cubeDiagLength, kLinearSpring * 1.2);
                     node.addSpring(linearSpring);
                 }
                 
@@ -164,16 +170,6 @@ SIMMY.Cube = function(xSize, ySize, zSize, xNodes, yNodes, zNodes, x, y, z, scen
                 // }
 
                 
-                for (let n = 0; n < paths.length; n++) {
-                    for (let m = 0; m < paths[n].length-1; m++) {
-                        const s1 = linearSprings[paths[n][m]];
-                        const s2 = linearSprings[paths[n][m+1]];
-                        if (s1 && s2) {
-                            const angleSpring = new SIMMY.AngleSpring(node, s1.node2, s2.node2, Math.PI/2, kAngleSpring);
-                            node.addSpring(angleSpring);
-                        }
-                    }
-                }
             }
         }
     }
@@ -429,7 +425,7 @@ SIMMY.Cube = function(xSize, ySize, zSize, xNodes, yNodes, zNodes, x, y, z, scen
         const midX = Math.floor(this.dimensions.xNodes / 2);
         const midY = Math.floor(this.dimensions.yNodes / 2);
         const midZ = Math.floor(this.dimensions.zNodes / 2);
-        const force = new THREE.Vector3((Math.random() - 0.5) * 8,3 + Math.random() * 3,(Math.random() - 0.5) * 8);
+        const force = new THREE.Vector3((Math.random() - 0.5) * 64,3 + Math.random() * 12,(Math.random() - 0.5) * 64);
         this.nodesDict[midX+"_"+midY+"_"+midZ].receiveInfluence(force, 0.1, true);
     };
 };
