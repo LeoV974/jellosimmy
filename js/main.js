@@ -56,7 +56,7 @@ class JelloSimulator {
         floor.mesh.receiveShadow = true;
         this.simulator.addPlane(floor);
         // Add jello cube
-        this.jelloCube = new SIMMY.Cube(2.5, 2.5, 2.5, 4, 4, 4, 0, 2, 0, this.scene);
+        this.jelloCube = new SIMMY.Cube(2.5, 2.5, 2.5, 6, 6, 6, 0, 2, 0, this.scene);
         this.jelloCube.mesh.castShadow = true;
         this.jelloCube.mesh.receiveShadow = true;
         this.simulator.addSpringMesh(this.jelloCube);
