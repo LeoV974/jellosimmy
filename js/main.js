@@ -173,63 +173,37 @@ class JelloSimulator {
         this.currentMaterialType = shaderType;
         this.renderer.render(this.scene, this.camera);
     }
+
+    initPlane(position, normal, width, height) {
+        const obj = new COLLISIONS.Plane(position, normal, width, height, this.scene);
+        obj.mesh.receiveShadow = true;
+        this.simulator.addPlane(obj);
+        obj.mesh.visible = true;
+        obj.type = 'plane';
+        this.collisionObjects.push(obj);
+    }
+
+    initSphere(center, radius) {
+        const obj = new COLLISIONS.Sphere(center, radius, this.scene);
+        obj.mesh.receiveShadow = true;
+        this.simulator.addPlane(obj);
+        obj.mesh.visible = true;
+        obj.type = 'sphere';
+        this.collisionObjects.push(obj);
+    }
+
+    initBox(xMin, xMax, yMin, yMax, zMin, zMax) {
+        const obj = new COLLISIONS.Box(xMin, xMax, yMin, yMax, zMin, zMax, this.scene);
+        obj.mesh.receiveShadow = true;
+        this.simulator.addPlane(obj);
+        obj.mesh.visible = true;
+        obj.type = 'box';
+        this.collisionObjects.push(obj);
+    }
     
+    // this is the initial scene
     initPlaneScene() {
-        const floor = new COLLISIONS.Plane(new THREE.Vector3(0, -2, 0), new THREE.Vector3(0, 1, 0), 20, 20, this.scene);
-        floor.mesh.receiveShadow = true;
-        this.simulator.addPlane(floor);
-        floor.mesh.visible = true;
-        
-        // Store reference to the type
-        floor.type = 'plane';
-        
-        // Add to the collisionObjects array
-        this.collisionObjects.push(floor);
-    }
-    
-    initSphereScene() {
-        const sphere = new COLLISIONS.Sphere(new THREE.Vector3(0, -5, 0), 2, this.scene);
-        sphere.mesh.receiveShadow = true;
-        this.simulator.addSphere(sphere);
-        sphere.mesh.visible = true;
-        
-        // Store reference to the type
-        sphere.type = 'sphere';
-        
-        // Add to the collisionObjects array
-        this.collisionObjects.push(sphere);
-    }
-    
-    initBoxScene() {
-        const box = new COLLISIONS.Box(-1, 1, -3, -1, -1, 1, this.scene);
-        box.mesh.receiveShadow = true;
-        this.simulator.addBox(box);
-        box.mesh.visible = true;
-        
-        // Store reference to the type
-        box.type = 'box';
-        
-        // Add to the collisionObjects array
-        this.collisionObjects.push(box);
-    }
-
-    initScene1() {
-        // just some placeholder stuff proof of concept that u can put multiple collision objects in 1 scene
-        this.floor = new COLLISIONS.Plane(new THREE.Vector3(1, -5, 1), new THREE.Vector3(-1, 1, 0), 10, 10, this.scene);
-        this.floor.mesh.receiveShadow = true;
-        this.simulator.addPlane(this.floor);
-        
-        this.sphere = new COLLISIONS.Sphere(new THREE.Vector3(1, -1, 1), 1, this.scene);
-        this.sphere.mesh.receiveShadow = true;
-        this.simulator.addSphere(this.sphere);
-
-        this.box = new COLLISIONS.Box(-2, 0, -3, -1, -2, 0, this.scene);
-        this.box.mesh.receiveShadow = true;
-        this.simulator.addBox(this.box);
-
-        this.box2 = new COLLISIONS.Box(1, 2, -3, -1, 1, 2, this.scene);
-        this.box2.mesh.receiveShadow = true;
-        this.simulator.addBox(this.box2);
+        this.initPlane(new THREE.Vector3(0, -2, 0), new THREE.Vector3(0, 1, 0), 20, 20);
     }
     
     setupLights() {
@@ -274,11 +248,15 @@ class JelloSimulator {
         if (type === 'plane') {
             this.initPlaneScene();
         } else if (type === 'sphere') {
-            this.initSphereScene();
+            this.initSphere(new THREE.Vector3(0, -5, 0), 2);
         } else if (type == 'box') {
-            this.initBoxScene();
+            this.initBox(-1, 1, -3, -1, -1, 1);
         } else if (type == 'scene1') {
-            this.initScene1();
+            // just some placeholder stuff proof of concept that u can put multiple collision objects in 1 scene
+            this.initPlane(new THREE.Vector3(1, -5, 1), new THREE.Vector3(-1, 1, 0), 10, 10);
+            this.initSphere(new THREE.Vector3(1, -1, 1), 1);
+            this.initBox(-2, 0, -3, -1, -2, 0);
+            this.initBox(1, 2, -3, -1, 1, 2);
         }
         // todo: some other scenes 
         // eg: "tetrominos", falling between several objects like plinko
