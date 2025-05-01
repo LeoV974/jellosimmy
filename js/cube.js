@@ -493,8 +493,8 @@ SIMMY.Cube = function(xSize, ySize, zSize, xNodes, yNodes, zNodes, x, y, z, scen
 
         // apply it to a central cube of size half the full jello cube
         for (i = Math.ceil(this.dimensions.xNodes / 4); i < Math.floor(3 * this.dimensions.xNodes / 4); i++) {
-            for (j = Math.ceil(this.dimensions.yNodes / 4); j < Math.floor(3 * this.dimensions.yNodes / 4); i++) {
-                for (k = Math.ceil(this.dimensions.zNodes / 4); k < Math.floor(3 * this.dimensions.zNodes / 4); i++) {
+            for (j = Math.ceil(this.dimensions.yNodes / 4); j < Math.floor(3 * this.dimensions.yNodes / 4); j++) {
+                for (k = Math.ceil(this.dimensions.zNodes / 4); k < Math.floor(3 * this.dimensions.zNodes / 4); k++) {
                     // force scales down as you get further from the center (will be 0 on a face node)
                     const force = new THREE.Vector3(multiplier * k_s * forceDir.x * (midX - Math.abs(i - midX)) / this.dimensions.xNodes, 
                                                     multiplier * k_s * forceDir.y * (midY - Math.abs(j - midY)) / this.dimensions.yNodes, 

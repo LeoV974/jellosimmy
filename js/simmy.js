@@ -79,8 +79,8 @@ SIMMY.SpringMesh.prototype.calcInfluence = function(scene, tdelta) {
 
     // Multi-directional iterations to avoid biasing the simulation
     const directions = [
-        [1, 1, 1], [0, 1, 1], [1, 1, 1], [0, 1, 1],
-        [1, 1, 0], [0, 1, 0], [1, 1, 0], [0, 1, 0]
+        [0, 0, 0], [0, 0, 1], [0, 1, 0], [0, 1, 1],
+        [1, 0, 0], [1, 0, 1], [1, 1, 0], [1, 1, 1]
     ];
 
     for (const dir of directions) {
@@ -158,17 +158,21 @@ SIMMY.SpringMesh.prototype.calcInfluence = function(scene, tdelta) {
                     const plane = scene.planes[n];
                     const ret = plane.nodeBelow(node);
                     if (ret.status) {
-                        const offset = 0.001;
-                        node.position.copy(ret.proj.add(plane.normal.clone().multiplyScalar(offset)));
-                        
-                        // Calculate bounce with capped restitution
-                        const restitution = 0.2;
-                        const normal = plane.normal.clone();
-                        const vDotN = node.velocityVec.dot(normal);
+                        // reverted to 0ing velocity
+                        node.position.copy(ret.proj); 
+                        node.velocityVec.set(0,0,0);
 
-                        if (vDotN < 0) {
-                            node.velocityVec.add(normal.multiplyScalar(-vDotN * (1 + restitution)));
-                        }
+                        // const offset = 0.001;
+                        // node.position.copy(ret.proj.add(plane.normal.clone().multiplyScalar(offset)));
+                        
+                        // // Calculate bounce with capped restitution
+                        // const restitution = 0.2;
+                        // const normal = plane.normal.clone();
+                        // const vDotN = node.velocityVec.dot(normal);
+
+                        // if (vDotN < 0) {
+                        //     node.velocityVec.add(normal.multiplyScalar(-vDotN * (1 + restitution)));
+                        // }
                     }
                 }
                 
@@ -177,17 +181,21 @@ SIMMY.SpringMesh.prototype.calcInfluence = function(scene, tdelta) {
                     const sphere = scene.spheres[n];
                     const ret = sphere.nodeBelow(node);
                     if (ret.status) {
-                        const normal = node.position.clone().sub(sphere.center).normalize();
+                        // reverted to 0ing velocity
+                        node.position.copy(ret.proj); 
+                        node.velocityVec.set(0,0,0);
+
+                        // const normal = node.position.clone().sub(sphere.center).normalize();
                         
-                        // Move node slightly outside the sphere
-                        const offset = 0.001;
-                        node.position.copy(sphere.center.clone().add(normal.multiplyScalar(sphere.radius + offset)));
-                        const restitution = 0.2;
-                        const vDotN = node.velocityVec.dot(normal);
+                        // // Move node slightly outside the sphere
+                        // const offset = 0.001;
+                        // node.position.copy(sphere.center.clone().add(normal.multiplyScalar(sphere.radius + offset)));
+                        // const restitution = 0.2;
+                        // const vDotN = node.velocityVec.dot(normal);
             
-                        if (vDotN < 0) {
-                            node.velocityVec.add(normal.multiplyScalar(-vDotN * (1 + restitution)));
-                        }
+                        // if (vDotN < 0) {
+                        //     node.velocityVec.add(normal.multiplyScalar(-vDotN * (1 + restitution)));
+                        // }
                     }
                 }
 

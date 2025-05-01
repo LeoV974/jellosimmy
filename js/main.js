@@ -208,6 +208,9 @@ class JelloSimulator {
         this.collisionType = type;
         
         if (type === 'plane') {
+            // want to replace all that stuff with 
+            this.clearScene();
+            
             // Remove sphere from simulator if it exists
             const sphereIndex = this.simulator.spheres.indexOf(this.sphere);
             if (sphereIndex !== -1) {
@@ -223,6 +226,9 @@ class JelloSimulator {
             this.floor.mesh.visible = true;
             this.sphere.mesh.visible = false;
         } else if (type === 'sphere') {
+            // want to replace all that stuff with 
+            this.clearScene();
+            
             // Remove plane from simulator
             const planeIndex = this.simulator.planes.indexOf(this.floor);
             if (planeIndex !== -1) {
@@ -237,7 +243,9 @@ class JelloSimulator {
             this.floor.mesh.visible = false;
             this.sphere.mesh.visible = true;
         } else if (type == 'box') {
+            // want to replace all that stuff with 
             this.clearScene();
+
             // Remove plane from simulator
             const planeIndex = this.simulator.planes.indexOf(this.floor);
             if (planeIndex !== -1) {
@@ -264,6 +272,7 @@ class JelloSimulator {
     }
 
     clearScene() {
+        
         // TODO 
     }
     
