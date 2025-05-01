@@ -38,12 +38,16 @@ SIMMY.Simulator.prototype.addBox = function(obj) {
 SIMMY.Simulator.prototype.update = function(tdelta) {
     let i;
     for (i = 0; i < this.springMeshes.length; i++) {
-        this.springMeshes[i].calcGravity(this.gravity, tdelta);
+        this.springMeshes[i].calcGravity(this.gravity,this.wind || new THREE.Vector3(0,0,0), tdelta);
     }
     for (i = 0; i < this.springMeshes.length; i++) {
         this.springMeshes[i].calcInfluence(this, tdelta);
     }
 };
+
+SIMMY.Simulator.prototype.setWind = function(windForce) {
+    this.wind = windForce;
+  };
 
 SIMMY.SpringMesh = function() {
     this.nodes = [];
@@ -62,13 +66,16 @@ SIMMY.SpringMesh.prototype.addNode = function(i, j, k, node) {
     this.spheres.push(sphere);
 };
 
-SIMMY.SpringMesh.prototype.calcGravity = function(gravity, tdelta) {
+SIMMY.SpringMesh.prototype.calcGravity = function(gravity, windForce, tdelta) {
     let node;
     for (let i = 0; i < this.nodes.length; i++) {
         for (let j = 0; j < this.nodes[i].length; j++) {
             for (let k = 0; k < this.nodes[i][j].length; k++) {
                 node = this.nodes[i][j][k];
-                node.receiveInfluence(gravity.clone().multiplyScalar(node.mass), tdelta);
+                // Combine gravity and wind forces
+                const combinedForce = gravity.clone().multiplyScalar(node.mass).add(windForce.clone().multiplyScalar(node.mass));
+                node.receiveInfluence(combinedForce, tdelta);
+                //node.receiveInfluence(gravity.clone().multiplyScalar(node.mass), tdelta);
             }
         }
     }

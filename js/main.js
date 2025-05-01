@@ -52,6 +52,14 @@ class JelloSimulator {
         document.getElementById('shaderType').addEventListener('change', (e) => {
             this.changeShader(e.target.value);
         });
+
+        this.windForce = new THREE.Vector3(0, 0, 0);
+        this.windEnabled = false;
+        document.getElementById('wind-toggle').addEventListener('click', () => {
+            this.windEnabled = !this.windEnabled;
+            const windForce = this.windEnabled ? new THREE.Vector3(5, 0, 0) : new THREE.Vector3(0, 0, 0);
+            this.simulator.setWind(windForce);
+        });
         
         // Start animation loop
         this.lastTime = Date.now();
@@ -60,6 +68,18 @@ class JelloSimulator {
         this.enableDebugVisuals();
     }
 
+    createWindIndicator() {
+        const windArrow = new THREE.ArrowHelper(
+          new THREE.Vector3(1, 0, 0),
+          new THREE.Vector3(-5, 2, 0),
+          3,
+          0xff0000,
+          0.5,
+          0.3
+        );
+        this.windIndicator = windArrow;
+        this.scene.add(windArrow);
+    }
     //diff materials
     setupMaterialPresets() {
         // Create environment map for crystal and mirror materials
@@ -202,6 +222,7 @@ class JelloSimulator {
         }
         
         this.simulator.addSpringMesh(this.jelloCube);
+        this.createWindIndicator();
     }
     
     switchCollisionType(type) {
@@ -264,6 +285,12 @@ class JelloSimulator {
     }
     
     animate() {
+        if (this.windIndicator) {
+            this.windIndicator.visible = this.windEnabled;
+            if (this.windEnabled) {
+              this.windIndicator.setDirection(this.simulator.wind.clone().normalize());
+            }
+        }
         requestAnimationFrame(this.animate);
         // Calculate delta time
         const currentTime = Date.now();
