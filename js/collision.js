@@ -10,7 +10,7 @@ COLLISIONS.Plane = function (position, normal, width, height, scene) {
     // Create visual representation
     const geometry = new THREE.PlaneGeometry(width || 20, height || 20);
     const material = new THREE.MeshPhongMaterial({
-        color: 0x666666,
+        color: 0x999999,
         side: THREE.DoubleSide,
         wireframe: false
     });
@@ -19,13 +19,13 @@ COLLISIONS.Plane = function (position, normal, width, height, scene) {
     this.mesh.position.copy(this.position);
 
     // Orient mesh to match normal
-    if (normal.y === 1) {
-        this.mesh.rotation.x = -Math.PI / 2;
-    } else if (normal.y === -1) {
-        this.mesh.rotation.x = Math.PI / 2;
-    } else {
+    // if (normal.y === 1) {
+    //     this.mesh.rotation.x = -Math.PI / 2;
+    // } else if (normal.y === -1) {
+    //     this.mesh.rotation.x = Math.PI / 2;
+    // } else {
         this.mesh.lookAt(this.position.clone().add(this.normal));
-    }
+    // }
 
     if (scene) scene.add(this.mesh);
 };
@@ -47,11 +47,11 @@ COLLISIONS.Sphere = function (center, radius, scene) {
     // Create visual representation
     const geometry = new THREE.SphereGeometry(this.radius, 32, 32);
     const material = new THREE.MeshPhongMaterial({
-        color: 0x666666,
+        color: 0x999999,
         side: THREE.DoubleSide,
         wireframe: false,
         transparent: true,
-        opacity: 0.3
+        opacity: 0.7
     });
 
     this.mesh = new THREE.Mesh(geometry, material);
@@ -92,11 +92,11 @@ COLLISIONS.Box = function (xMin, xMax, yMin, yMax, zMin, zMax, scene) {
     
     const geometry = new THREE.BoxGeometry(xMax - xMin, yMax - yMin, zMax - zMin );
     const material = new THREE.MeshPhongMaterial({
-        color: 0x666666,
+        color: 0x999999,
         side: THREE.FrontSide,
         wireframe: false,
         transparent: true,
-        opacity: 0.3
+        opacity: 0.7
     });
     
     this.mesh = new THREE.Mesh(geometry, material);
