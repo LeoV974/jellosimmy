@@ -97,13 +97,15 @@ SIMMY.SpringMesh.prototype.applyForces = function(tdelta) {
             for (let k = 0; k < this.nodes[i][j].length; k++) {
                 node = this.nodes[i][j][k];
                 if (node.forceApplied) {
-                    // Apply all accumulated forces
+                    // Semi-implicit Euler method
                     const aVec = node.forceVec.clone().multiplyScalar(1/node.mass);
-                    const posDiff = node.velocityVec.clone().multiplyScalar(tdelta).add(aVec.clone().multiplyScalar(0.5 * tdelta * tdelta));
                     const vDiff = aVec.clone().multiplyScalar(tdelta);
-                    
-                    node.updatePosition(posDiff);
+                    // update velocity before updating position (so we use future velocity)
                     node.velocityVec.add(vDiff);
+
+                    const posDiff = node.velocityVec.clone().multiplyScalar(tdelta);
+                    node.updatePosition(posDiff);
+                    
                 }
             }
         }
