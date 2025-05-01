@@ -24,11 +24,25 @@ SIMMY.Simulator.prototype.addSphere = function(obj) {
 
 SIMMY.Simulator.prototype.update = function(tdelta) {
     let i;
+    
+    // Reset all force vectors
+    for (i = 0; i < this.springMeshes.length; i++) {
+        this.springMeshes[i].resetForces();
+    }
+    
+    // Calculate and accumulate gravity forces
     for (i = 0; i < this.springMeshes.length; i++) {
         this.springMeshes[i].calcGravity(this.gravity, tdelta);
     }
+    
+    // Calculate and accumulate all other forces
     for (i = 0; i < this.springMeshes.length; i++) {
         this.springMeshes[i].calcInfluence(this, tdelta);
+    }
+    
+    // Apply the accumulated forces and update positions
+    for (i = 0; i < this.springMeshes.length; i++) {
+        this.springMeshes[i].applyForces(tdelta);
     }
 };
 
@@ -61,34 +75,50 @@ SIMMY.SpringMesh.prototype.calcGravity = function(gravity, tdelta) {
     }
 };
 
+// Reset all force vectors to zero
+SIMMY.SpringMesh.prototype.resetForces = function() {
+    let node;
+    for (let i = 0; i < this.nodes.length; i++) {
+        for (let j = 0; j < this.nodes[i].length; j++) {
+            for (let k = 0; k < this.nodes[i][j].length; k++) {
+                node = this.nodes[i][j][k];
+                node.forceVec.set(0, 0, 0);
+                node.forceApplied = false;
+            }
+        }
+    }
+};
+
+// Apply all accumulated forces at once
+SIMMY.SpringMesh.prototype.applyForces = function(tdelta) {
+    let node;
+    for (let i = 0; i < this.nodes.length; i++) {
+        for (let j = 0; j < this.nodes[i].length; j++) {
+            for (let k = 0; k < this.nodes[i][j].length; k++) {
+                node = this.nodes[i][j][k];
+                if (node.forceApplied) {
+                    // Apply all accumulated forces
+                    const aVec = node.forceVec.clone().multiplyScalar(1/node.mass);
+                    const posDiff = node.velocityVec.clone().multiplyScalar(tdelta).add(aVec.clone().multiplyScalar(0.5 * tdelta * tdelta));
+                    const vDiff = aVec.clone().multiplyScalar(tdelta);
+                    
+                    node.updatePosition(posDiff);
+                    node.velocityVec.add(vDiff);
+                }
+            }
+        }
+    }
+};
+
 SIMMY.SpringMesh.prototype.calcInfluence = function(collisionObjects, tdelta) {
     let node;
 
-    // Multi-directional iterations to avoid biasing the simulation
-    const directions = [
-        [1, 1, 1], [0, 1, 1], [1, 1, 1], [0, 1, 1],
-        [1, 1, 0], [0, 1, 0], [1, 1, 0], [0, 1, 0]
-    ];
-
-    for (const dir of directions) {
-        const iStart = dir[0] ? 0 : this.nodes.length - 1;
-        const iEnd = dir[0] ? this.nodes.length : -1;
-        const iStep = dir[0] ? 1 : -1;
-
-        for (let i = iStart; dir[0] ? i < iEnd : i > iEnd; i += iStep) {
-            const jStart = dir[1] ? 0 : this.nodes[i].length - 1;
-            const jEnd = dir[1] ? this.nodes[i].length : -1;
-            const jStep = dir[1] ? 1 : -1;
-
-            for (let j = jStart; dir[1] ? j < jEnd : j > jEnd; j += jStep) {
-                const kStart = dir[2] ? 0 : this.nodes[i][j].length - 1;
-                const kEnd = dir[2] ? this.nodes[i][j].length : -1;
-                const kStep = dir[2] ? 1 : -1;
-
-                for (let k = kStart; dir[2] ? k < kEnd : k > kEnd; k += kStep) {
-                    node = this.nodes[i][j][k];
-                    node.sendInfluence(tdelta);
-                }
+    // Calculate spring forces
+    for (let i = 0; i < this.nodes.length; i++) {
+        for (let j = 0; j < this.nodes[i].length; j++) {
+            for (let k = 0; k < this.nodes[i][j].length; k++) {
+                node = this.nodes[i][j][k];
+                node.sendInfluence(tdelta);
             }
         }
     }
@@ -113,7 +143,12 @@ SIMMY.SpringMesh.prototype.calcInfluence = function(collisionObjects, tdelta) {
                         const vDotN = node.velocityVec.dot(normal);
 
                         if (vDotN < 0) {
-                            node.velocityVec.add(normal.multiplyScalar(-vDotN * (1 + restitution)));
+                            // Add collision response force
+                            const bounceForce = normal.multiplyScalar(-vDotN * (1 + restitution) * node.mass / tdelta);
+                            node.receiveInfluence(bounceForce, tdelta, true);
+                            
+                            // Zero out the component of velocity in the direction of the normal
+                            node.velocityVec.sub(normal.clone().multiplyScalar(vDotN));
                         }
                     }
                 }
@@ -132,7 +167,12 @@ SIMMY.SpringMesh.prototype.calcInfluence = function(collisionObjects, tdelta) {
                         const vDotN = node.velocityVec.dot(normal);
             
                         if (vDotN < 0) {
-                            node.velocityVec.add(normal.multiplyScalar(-vDotN * (1 + restitution)));
+                            // Add collision response force
+                            const bounceForce = normal.multiplyScalar(-vDotN * (1 + restitution) * node.mass / tdelta);
+                            node.receiveInfluence(bounceForce, tdelta, true);
+                            
+                            // Zero out the component of velocity in the direction of the normal
+                            node.velocityVec.sub(normal.clone().multiplyScalar(vDotN));
                         }
                     }
                 }
@@ -147,8 +187,9 @@ SIMMY.SpringNode = function(position, mass) {
     this.mass = mass;
     this.linearSprings = [];
     this.angleSprings = [];
-    // TODO: make force calculation work by timestep instead of whats happening rn
     this.forceVec = new THREE.Vector3(0,0,0);
+    // Track whether forces have been applied this timestep
+    this.forceApplied = false;
 };
 
 SIMMY.SpringNode.prototype.addSpring = function(spring) {
@@ -164,13 +205,19 @@ SIMMY.SpringNode.prototype.updatePosition = function(posDiff) {
 };
 
 SIMMY.SpringNode.prototype.receiveInfluence = function(forceVec, tdelta, override) {
+    // Instead of immediately applying forces, accumulate them in forceVec
     const c = override ? 0.0 : 0.6;  // Damping factor
-    const realForce = forceVec.sub(this.velocityVec.clone().multiplyScalar(c));
-    const aVec = realForce.clone().multiplyScalar(1/this.mass);
-    const posDiff = this.velocityVec.clone().multiplyScalar(tdelta).add(aVec.clone().multiplyScalar(0.5 * tdelta * tdelta));
-    const vDiff = aVec.clone().multiplyScalar(tdelta);
-    this.updatePosition(posDiff);
-    this.velocityVec.add(vDiff);
+    const dampingForce = this.velocityVec.clone().multiplyScalar(c);
+    
+    // Add the force to the accumulated force vector
+    this.forceVec.add(forceVec);
+    
+    // If not overridden, also apply damping forces
+    if (!override) {
+        this.forceVec.sub(dampingForce);
+    }
+    
+    this.forceApplied = true;
 };
 
 SIMMY.SpringNode.prototype.sendInfluence = function(tdelta) {
@@ -197,6 +244,9 @@ SIMMY.Spring.prototype.calcForce = function(tdelta) {
     const newLength = this.node2.position.clone().sub(this.node1.position).length();
     const lenDiff = this.length - newLength;
     const force = Math.min(Math.max(lenDiff * this.k, -4), 4); // Limit force magnitude
+    
+    // Apply force to both nodes in opposite directions
+    this.node1.receiveInfluence(dir.clone().multiplyScalar(-force), tdelta);
     this.node2.receiveInfluence(dir.multiplyScalar(force), tdelta);
 };
 
@@ -217,21 +267,40 @@ SIMMY.AngleSpring.prototype.calcForce = function(tdelta) {
     const normC = c.clone().cross(vDiff).normalize();
     const moveV1 = normC.clone().cross(v1.clone().negate()).normalize();
     const moveV2 = normC.clone().cross(v2).normalize();
-    const angle = Math.acos(v1.dot(v2));
+    const angle = Math.acos(Math.min(Math.max(v1.dot(v2), -1), 1)); // Clamp to avoid NaN
     
     if (angle > this.angle) {
         const negMoveV1 = moveV1.negate();
         const negMoveV2 = moveV2.negate();
-        this.node1.receiveInfluence(negMoveV1.multiplyScalar((angle - this.angle)*this.k), tdelta);
-        this.node2.receiveInfluence(negMoveV2.multiplyScalar((angle - this.angle)*this.k), tdelta);
+        
+        // Calculate forces for all three nodes
+        const force1 = negMoveV1.multiplyScalar((angle - this.angle) * this.k);
+        const force2 = negMoveV2.multiplyScalar((angle - this.angle) * this.k);
+        
+        // Apply forces to outer nodes
+        this.node1.receiveInfluence(force1, tdelta);
+        this.node2.receiveInfluence(force2, tdelta);
+        
+        // Apply equal and opposite forces to center node to maintain conservation of momentum
+        const centerForce = force1.clone().negate().add(force2.clone().negate());
+        this.cNode.receiveInfluence(centerForce, tdelta);
     } else {
-        this.node1.receiveInfluence(moveV1.multiplyScalar((this.angle - angle)*this.k), tdelta);
-        this.node2.receiveInfluence(moveV2.multiplyScalar((this.angle - angle)*this.k), tdelta);
+        // Calculate forces for all three nodes
+        const force1 = moveV1.multiplyScalar((this.angle - angle) * this.k);
+        const force2 = moveV2.multiplyScalar((this.angle - angle) * this.k);
+        
+        // Apply forces to outer nodes
+        this.node1.receiveInfluence(force1, tdelta);
+        this.node2.receiveInfluence(force2, tdelta);
+        
+        // Apply equal and opposite forces to center node to maintain conservation of momentum
+        const centerForce = force1.clone().negate().add(force2.clone().negate());
+        this.cNode.receiveInfluence(centerForce, tdelta);
     }
 };
 
+// Export the collision objects from the other file as part of SIMMY
 SIMMY.Plane = COLLISIONS.Plane;
 SIMMY.Sphere = COLLISIONS.Sphere;
-
 
 export { SIMMY };
