@@ -6,7 +6,8 @@ SIMMY.Cube = function(xSize, ySize, zSize, xNodes, yNodes, zNodes, x, y, z, scen
     // Create geometry for the jello cube
     const geometry = new THREE.BufferGeometry();
     
-    const k_s = 100; // spring constant
+    const k_s = 50; // spring constant
+    const kAngleSpring = 20;   // Angle spring strength
     const nodesDict = {};
     
     const startX = x - xSize/2;
@@ -206,8 +207,26 @@ SIMMY.Cube = function(xSize, ySize, zSize, xNodes, yNodes, zNodes, x, y, z, scen
                         cubeDiagLength, k_shearing_body);
                     node.addSpring(s);
                 }
-                
-                
+
+                // Angle springs to maintain cube shape
+                const paths = [
+                    ['-x', '+y', '+x', '-y'],
+                    ['-x', '+z', '+x', '-z'],
+                    ['-z', '+y', '+z', '-y']
+                ];
+
+                for (let n = 0; n < paths.length; n++) {
+                    for (let m = 0; m < paths[n].length - 1; m++) {
+                        const s1 = springs[paths[n][m]];
+                        const s2 = springs[paths[n][m + 1]];
+                        if (s1 && s2) {
+                            const angleSpring = new SIMMY.AngleSpring(node, s1.node2, s2.node2, Math.PI / 2, kAngleSpring);
+                            node.addSpring(angleSpring);
+                        }
+                    }
+                }
+
+
             }
         }
     }
@@ -462,9 +481,9 @@ SIMMY.Cube = function(xSize, ySize, zSize, xNodes, yNodes, zNodes, x, y, z, scen
     
     // Disturb function to apply random force to jello
     this.disturb = function() {
-        const midX = Math.floor(this.dimensions.xNodes / 2);
-        const midY = Math.floor(this.dimensions.yNodes / 2);
-        const midZ = Math.floor(this.dimensions.zNodes / 2);
+        const midX = (this.dimensions.xNodes - 1)/ 2;
+        const midY = (this.dimensions.yNodes - 1)/ 2;
+        const midZ = (this.dimensions.zNodes - 1)/ 2;
 
         // randomly choose which direction to disturb, but always disturb with same magnitude of force
         // (avoids issue where sometimes you click it and it doesn't move much because it lowrolled all 3) 
@@ -477,9 +496,9 @@ SIMMY.Cube = function(xSize, ySize, zSize, xNodes, yNodes, zNodes, x, y, z, scen
             for (j = Math.ceil(this.dimensions.yNodes / 4); j < Math.floor(3 * this.dimensions.yNodes / 4); i++) {
                 for (k = Math.ceil(this.dimensions.zNodes / 4); k < Math.floor(3 * this.dimensions.zNodes / 4); i++) {
                     // force scales down as you get further from the center (will be 0 on a face node)
-                    const force = new THREE.Vector3(multiplier * k_s * forceDir.x * Math.abs(i - midX) / this.dimensions.xNodes, 
-                                                    multiplier * k_s * forceDir.y * Math.abs(j - midY) / this.dimensions.yNodes, 
-                                                    multiplier * k_s * forceDir.z * Math.abs(k - midZ) / this.dimensions.zNodes);
+                    const force = new THREE.Vector3(multiplier * k_s * forceDir.x * (midX - Math.abs(i - midX)) / this.dimensions.xNodes, 
+                                                    multiplier * k_s * forceDir.y * (midY - Math.abs(j - midY)) / this.dimensions.yNodes, 
+                                                    multiplier * k_s * forceDir.z * (midZ - Math.abs(k - midZ)) / this.dimensions.zNodes);
                     
                     this.nodesDict[i+"_"+j+"_"+k].receiveInfluence(force, 0.1, true);
                 }
