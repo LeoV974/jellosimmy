@@ -22,6 +22,9 @@ class JelloSimulator {
         // Setup material presets first
         this.setupMaterialPresets();
         this.currentMaterialType = 'standard';
+
+        // pause functionality
+        this.isPaused = false;
         
         // Initialize collision objects
         this.collisionType = 'plane';
@@ -33,8 +36,10 @@ class JelloSimulator {
         this.resetJello = this.resetJello.bind(this);
         this.disturbJello = this.disturbJello.bind(this);
         this.changeShader = this.changeShader.bind(this); // Bind changeShader method
+        this.togglePause = this.togglePause.bind(this);
         
         window.addEventListener('resize', this.onWindowResize);
+        document.getElementById('pause').addEventListener('click', () => this.togglePause());
         document.getElementById('reset').addEventListener('click', this.resetJello);
         document.getElementById('disturb').addEventListener('click', this.disturbJello);
         document.getElementById('debug-toggle').addEventListener('click', () => this.toggleDebugVisuals());
@@ -238,9 +243,16 @@ class JelloSimulator {
         const deltaTime = (currentTime - this.lastTime) / 5000;
         this.lastTime = currentTime;
         const subSteps = 10;
-        for (let i = 0; i < subSteps; i++) {
-            this.simulator.update(deltaTime / subSteps);
+
+        if (!this.isPaused) {
+            // Physics update code runs only when not paused
+            const subSteps = 10;
+            for (let i = 0; i < subSteps; i++) {
+                this.simulator.update(deltaTime / subSteps);
+            }
+            this.jelloCube.updateGeometry();
         }
+
         this.jelloCube.updateGeometry();
         this.controls.update();
         this.renderer.render(this.scene, this.camera);
@@ -253,6 +265,10 @@ class JelloSimulator {
             this.disableDebugVisuals();
             this.enableDebugVisuals();
         }
+    }
+
+    togglePause() {
+        this.isPaused = !this.isPaused;
     }
     
     onWindowResize() {
