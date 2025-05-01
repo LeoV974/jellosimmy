@@ -6,9 +6,11 @@ const SIMMY = {};
 SIMMY.Simulator = function(gravity) {
     this.gravity = gravity || new THREE.Vector3(0,-9.8,0);
     this.springMeshes = [];
+    this.collisionObjects = []; // TODO: CONSOLIDATE ALL COLLISION BOXES INTO ONE ARRAY?
+    // want to delete these 3 later
     this.planes = [];
     this.spheres = [];
-    this.boxes = []; // rectangular prisms
+    this.boxes = [];
 };
 
 SIMMY.Simulator.prototype.addSpringMesh = function(obj) {
@@ -16,15 +18,21 @@ SIMMY.Simulator.prototype.addSpringMesh = function(obj) {
 };
 
 SIMMY.Simulator.prototype.addPlane = function(obj) {
-    this.planes.push(obj);
+    obj.type = 'plane';
+    this.planes.push(obj); // dont worry about these being doubled rn i'll delete these later
+    this.collisionObjects.push(obj);
 };
 
 SIMMY.Simulator.prototype.addSphere = function(obj) {
-    this.spheres.push(obj);
+    obj.type = 'sphere';
+    this.spheres.push(obj); // temporary
+    this.collisionObjects.push(obj);
 };
 
 SIMMY.Simulator.prototype.addBpx = function(obj) {
-    this.boxes.push(obj);
+    obj.type = 'box';
+    this.boxes.push(obj); // temporary
+    this.collisionObjects.push(obj);
 };
 
 SIMMY.Simulator.prototype.update = function(tdelta) {
@@ -66,7 +74,7 @@ SIMMY.SpringMesh.prototype.calcGravity = function(gravity, tdelta) {
     }
 };
 
-SIMMY.SpringMesh.prototype.calcInfluence = function(collisionObjects, tdelta) {
+SIMMY.SpringMesh.prototype.calcInfluence = function(scene, tdelta) {
     let node;
 
     // Multi-directional iterations to avoid biasing the simulation
@@ -103,10 +111,51 @@ SIMMY.SpringMesh.prototype.calcInfluence = function(collisionObjects, tdelta) {
         for (let j = 0; j < this.nodes[i].length; j++) {
             for (let k = 0; k < this.nodes[i][j].length; k++) {
                 node = this.nodes[i][j][k];
+
+                // check all collisions
+                // TODO: this correctly detects if it's hitting the object with nodeBelow
+                // but then it just freezes instead of applying the collision physics
+                // but I want to change collision physics anyways so maybe shouldn't sweat it
+                /*
+                for (let n = 0; n < scene.collisionObjects.length; n++) {
+                    const co = scene.collisionObjects[n];
+                    const ret = co.nodeBelow(node);    
+                    if (ret.status) {
+                        if (obj.type === 'sphere') {
+                            const normal = node.position.clone().sub(obj.center).normalize();
+                        
+                            // Move node slightly outside the sphere
+                            const offset = 0.001;
+                            node.position.copy(obj.center.clone().add(normal.multiplyScalar(obj.radius + offset)));
+                            const restitution = 0.2;
+                            const vDotN = node.velocityVec.dot(normal);
                 
+                            if (vDotN < 0) {
+                                node.velocityVec.add(normal.multiplyScalar(-vDotN * (1 + restitution)));
+                            }
+                        } else if (obj.type === 'plane') {
+                            const offset = 0.001;
+                            node.position.copy(ret.proj.add(obj.normal.clone().multiplyScalar(offset)));
+                            
+                            // Calculate bounce with capped restitution
+                            const restitution = 0.2;
+                            const normal = obj.normal.clone();
+                            const vDotN = node.velocityVec.dot(normal);
+
+                            if (vDotN < 0) {
+                                node.velocityVec.add(normal.multiplyScalar(-vDotN * (1 + restitution)));
+                            }
+                        } else if (obj.type === 'box') {
+                            // TODO
+                        }
+                    }
+
+                }
+                */
+
                 // Check plane collisions
-                for (let n = 0; n < collisionObjects.planes.length; n++) {
-                    const plane = collisionObjects.planes[n];
+                for (let n = 0; n < scene.planes.length; n++) {
+                    const plane = scene.planes[n];
                     const ret = plane.nodeBelow(node);
                     if (ret.status) {
                         const offset = 0.001;
@@ -124,8 +173,8 @@ SIMMY.SpringMesh.prototype.calcInfluence = function(collisionObjects, tdelta) {
                 }
                 
                 // Check sphere collisions
-                for (let n = 0; n < collisionObjects.spheres.length; n++) {
-                    const sphere = collisionObjects.spheres[n];
+                for (let n = 0; n < scene.spheres.length; n++) {
+                    const sphere = scene.spheres[n];
                     const ret = sphere.nodeBelow(node);
                     if (ret.status) {
                         const normal = node.position.clone().sub(sphere.center).normalize();
@@ -143,21 +192,13 @@ SIMMY.SpringMesh.prototype.calcInfluence = function(collisionObjects, tdelta) {
                 }
 
                 // TODO: collision with axis-aligned rectangular prism
-                for (let n = 0; n < collisionObjects.boxes.length; n++) {
-                    const sphere = collisionObjects.boxes[n];
-                    const ret = sphere.nodeBelow(node);
+                for (let n = 0; n < scene.boxes.length; n++) {
+                    const box = scene.boxes[n];
+                    const ret = box.nodeBelow(node);
                     if (ret.status) {
-                        const normal = node.position.clone().sub(sphere.center).normalize();
-                        
-                        // Move node slightly outside the sphere
-                        const offset = 0.001;
-                        node.position.copy(sphere.center.clone().add(normal.multiplyScalar(sphere.radius + offset)));
-                        const restitution = 0.2;
-                        const vDotN = node.velocityVec.dot(normal);
-            
-                        if (vDotN < 0) {
-                            node.velocityVec.add(normal.multiplyScalar(-vDotN * (1 + restitution)));
-                        }
+                        // lol
+                        // I don't want to do this stuff yet bc I would like to consolidate all collision objects into one loop
+                        // and if possible have collisions be handled by creating an imaginary collision spring
                     }
                 }
 

@@ -84,8 +84,8 @@ COLLISIONS.Sphere.prototype.nodeBelow = function (node) {
 COLLISIONS.Box = function (xMin, xMax, yMin, yMax, zMin, zMax, scene) {
     this.xMin = xMin || -1;
     this.xMax = xMax || 1;
-    this.yMin = yMin || -1;
-    this.yMax = yMax || 1;
+    this.yMin = yMin || -3;
+    this.yMax = yMax || -1;
     this.zMin = zMin || -1;
     this.zMax = zMax || 1;
 
@@ -105,7 +105,26 @@ COLLISIONS.Box = function (xMin, xMax, yMin, yMax, zMin, zMax, scene) {
 }
 
 COLLISIONS.Box.prototype.nodeBelow = function (node) {
-    // tbh what does this do
+    if (xMin <= node.x && node.x <= xMax 
+        && yMin <= node.y && node.y <= yMax 
+        && zMin <= node.z && node.z <= zMax ) {
+
+            const x = max(max(this.xMin, min(node.x), this.xMax));
+            const y = max(max(this.yMin, min(node.y), this.yMax));
+            const z = max(max(this.zMin, min(node.z), this.zMax));
+
+            const projPoint = new Vector3(x, y, z);
+
+            return {
+                status: true,
+                proj: projPoint
+            };
+    }
+
+    return {
+        status: false,
+        proj: node.position.clone()
+    };
 }
 
 export { COLLISIONS };
