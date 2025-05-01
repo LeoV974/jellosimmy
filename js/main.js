@@ -22,7 +22,7 @@ class JelloSimulator {
         
         // Setup material presets first
         this.setupMaterialPresets();
-        this.currentMaterialType = 'standard';
+        this.currentMaterialType = 'phong';
 
         // pause functionality
         this.isPaused = false;
@@ -466,5 +466,8 @@ JelloSimulator.prototype.setElasticity = function(value) {
 
 
 document.addEventListener('DOMContentLoaded', () => {
+    // document.getElementById('collisionType').value = "plane";
+    // document.getElementById('shaderType').value = "phong";
     const app = new JelloSimulator();
+    
 });
