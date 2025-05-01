@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'OrbitControls';
 import { SIMMY } from './simmy.js';
+import { COLLISIONS } from './collision.js';
 
 // Main application
 class JelloSimulator {
@@ -154,14 +155,19 @@ class JelloSimulator {
     
     initCollisionObjects() {
         // Create floor plane
-        this.floor = new SIMMY.Plane(new THREE.Vector3(0, -2, 0), new THREE.Vector3(0, 1, 0), 20, 20, this.scene);
+        this.floor = new COLLISIONS.Plane(new THREE.Vector3(0, -2, 0), new THREE.Vector3(0, 1, 0), 20, 20, this.scene);
         this.floor.mesh.receiveShadow = true;
         this.simulator.addPlane(this.floor);
         
         // Create sphere but don't add to simulator yet
-        this.sphere = new SIMMY.Sphere(new THREE.Vector3(0, -5, 0), 2, this.scene);
+        this.sphere = new COLLISIONS.Sphere(new THREE.Vector3(0, -5, 0), 2, this.scene);
         this.sphere.mesh.receiveShadow = true;
         this.sphere.mesh.visible = false;
+
+        // Create a box
+        this.box = new COLLISIONS.Box(-1, 1, -3, -1, -1, 1, this.scene);
+        this.box.mesh.receiveShadow = true;
+        this.box.mesh.visible = false;
     }
     
     setupLights() {
@@ -230,10 +236,35 @@ class JelloSimulator {
             
             this.floor.mesh.visible = false;
             this.sphere.mesh.visible = true;
+        } else if (type == 'box') {
+            this.clearScene();
+            // Remove plane from simulator
+            const planeIndex = this.simulator.planes.indexOf(this.floor);
+            if (planeIndex !== -1) {
+                this.simulator.planes.splice(planeIndex, 1);
+            }
+            // Remove sphere from simulator
+            const sphereIndex = this.simulator.spheres.indexOf(this.sphere);
+            if (sphereIndex !== -1) {
+                this.simulator.spheres.splice(sphereIndex, 1);
+            }
+            
+            // show box
+            this.floor.mesh.visible = false;
+            this.sphere.mesh.visible = false;
+            this.box.mesh.visible = true;
         }
+        // todo: some other scenes 
+        // eg: tetrominos, falling through several objects
+        // 
+        
         
         // Reset jello position
         this.resetJello();
+    }
+
+    clearScene() {
+        // TODO 
     }
     
     animate() {

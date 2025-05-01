@@ -81,5 +81,32 @@ COLLISIONS.Sphere.prototype.nodeBelow = function (node) {
     };
 };
 
+COLLISIONS.Box = function (xMin, xMax, yMin, yMax, zMin, zMax, scene) {
+    this.xMin = xMin || -1;
+    this.xMax = xMax || 1;
+    this.yMin = yMin || -1;
+    this.yMax = yMax || 1;
+    this.zMin = zMin || -1;
+    this.zMax = zMax || 1;
+
+    const geometry = new THREE.BoxGeometry(xMax - xMin, yMax - yMin, zMax - zMin );
+    const material = new THREE.MeshPhongMaterial({
+        color: 0x666666,
+        side: THREE.FrontSide,
+        wireframe: false,
+        transparent: true,
+        opacity: 0.3
+    })
+
+    this.mesh = new THREE.Mesh(geometry, material);
+    this.mesh.position.copy(new THREE.Vector3((xMin + xMax) / 2, (yMin + yMax) / 2, (zMin + zMax) / 2));
+
+    if (scene) scene.add(this.mesh);
+}
+
+COLLISIONS.Box.prototype.nodeBelow = function (node) {
+    // tbh what does this do
+}
+
 export { COLLISIONS };
 

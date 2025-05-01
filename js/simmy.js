@@ -8,6 +8,7 @@ SIMMY.Simulator = function(gravity) {
     this.springMeshes = [];
     this.planes = [];
     this.spheres = [];
+    this.boxes = []; // rectangular prisms
 };
 
 SIMMY.Simulator.prototype.addSpringMesh = function(obj) {
@@ -20,6 +21,10 @@ SIMMY.Simulator.prototype.addPlane = function(obj) {
 
 SIMMY.Simulator.prototype.addSphere = function(obj) {
     this.spheres.push(obj);
+};
+
+SIMMY.Simulator.prototype.addBpx = function(obj) {
+    this.boxes.push(obj);
 };
 
 SIMMY.Simulator.prototype.update = function(tdelta) {
@@ -136,6 +141,26 @@ SIMMY.SpringMesh.prototype.calcInfluence = function(collisionObjects, tdelta) {
                         }
                     }
                 }
+
+                // TODO: collision with axis-aligned rectangular prism
+                for (let n = 0; n < collisionObjects.boxes.length; n++) {
+                    const sphere = collisionObjects.boxes[n];
+                    const ret = sphere.nodeBelow(node);
+                    if (ret.status) {
+                        const normal = node.position.clone().sub(sphere.center).normalize();
+                        
+                        // Move node slightly outside the sphere
+                        const offset = 0.001;
+                        node.position.copy(sphere.center.clone().add(normal.multiplyScalar(sphere.radius + offset)));
+                        const restitution = 0.2;
+                        const vDotN = node.velocityVec.dot(normal);
+            
+                        if (vDotN < 0) {
+                            node.velocityVec.add(normal.multiplyScalar(-vDotN * (1 + restitution)));
+                        }
+                    }
+                }
+
             }
         }
     }
