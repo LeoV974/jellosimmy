@@ -6,7 +6,6 @@ const SIMMY = {};
 SIMMY.Simulator = function(gravity) {
     this.gravity = gravity || new THREE.Vector3(0,-9.8,0);
     this.springMeshes = [];
-    this.collisionObjects = []; // TODO: CONSOLIDATE ALL COLLISION BOXES INTO ONE ARRAY?
     // want to delete these 3 later
     this.planes = [];
     this.spheres = [];
@@ -19,20 +18,17 @@ SIMMY.Simulator.prototype.addSpringMesh = function(obj) {
 
 SIMMY.Simulator.prototype.addPlane = function(obj) {
     obj.type = 'plane';
-    this.planes.push(obj); // dont worry about these being doubled rn i'll delete these later
-    this.collisionObjects.push(obj);
+    this.planes.push(obj);
 };
 
 SIMMY.Simulator.prototype.addSphere = function(obj) {
     obj.type = 'sphere';
-    this.spheres.push(obj); // temporary
-    this.collisionObjects.push(obj);
+    this.spheres.push(obj);
 };
 
 SIMMY.Simulator.prototype.addBox = function(obj) {
     obj.type = 'box';
-    this.boxes.push(obj); // temporary
-    this.collisionObjects.push(obj);
+    this.boxes.push(obj);
 };
 
 SIMMY.Simulator.prototype.update = function(tdelta) {
@@ -118,47 +114,6 @@ SIMMY.SpringMesh.prototype.calcInfluence = function(scene, tdelta) {
         for (let j = 0; j < this.nodes[i].length; j++) {
             for (let k = 0; k < this.nodes[i][j].length; k++) {
                 node = this.nodes[i][j][k];
-
-                // check all collisions
-                // TODO: this correctly detects if it's hitting the object with nodeBelow
-                // but then it just freezes instead of applying the collision physics
-                // but I want to change collision physics anyways so maybe shouldn't sweat it
-                /*
-                for (let n = 0; n < scene.collisionObjects.length; n++) {
-                    const co = scene.collisionObjects[n];
-                    const ret = co.nodeBelow(node);    
-                    if (ret.status) {
-                        if (obj.type === 'sphere') {
-                            const normal = node.position.clone().sub(obj.center).normalize();
-                        
-                            // Move node slightly outside the sphere
-                            const offset = 0.001;
-                            node.position.copy(obj.center.clone().add(normal.multiplyScalar(obj.radius + offset)));
-                            const restitution = 0.2;
-                            const vDotN = node.velocityVec.dot(normal);
-                
-                            if (vDotN < 0) {
-                                node.velocityVec.add(normal.multiplyScalar(-vDotN * (1 + restitution)));
-                            }
-                        } else if (obj.type === 'plane') {
-                            const offset = 0.001;
-                            node.position.copy(ret.proj.add(obj.normal.clone().multiplyScalar(offset)));
-                            
-                            // Calculate bounce with capped restitution
-                            const restitution = 0.2;
-                            const normal = obj.normal.clone();
-                            const vDotN = node.velocityVec.dot(normal);
-
-                            if (vDotN < 0) {
-                                node.velocityVec.add(normal.multiplyScalar(-vDotN * (1 + restitution)));
-                            }
-                        } else if (obj.type === 'box') {
-                            // TODO
-                        }
-                    }
-
-                }
-                */
 
                 // Check plane collisions
                 for (let n = 0; n < scene.planes.length; n++) {
