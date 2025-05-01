@@ -1,4 +1,6 @@
 import * as THREE from 'three';
+import { COLLISIONS } from './collision.js';
+
 const SIMMY = {};
 
 SIMMY.Simulator = function(gravity) {
@@ -145,6 +147,8 @@ SIMMY.SpringNode = function(position, mass) {
     this.mass = mass;
     this.linearSprings = [];
     this.angleSprings = [];
+    // TODO: make force calculation work by timestep instead of whats happening rn
+    this.forceVec = new THREE.Vector3(0,0,0);
 };
 
 SIMMY.SpringNode.prototype.addSpring = function(spring) {
@@ -226,6 +230,8 @@ SIMMY.AngleSpring.prototype.calcForce = function(tdelta) {
     }
 };
 
+// want to move this stuff to new file
+/*
 SIMMY.Plane = function(position, normal, width, height, scene) {
     this.plane = new THREE.Plane();
     this.position = position || new THREE.Vector3(0,0,0);
@@ -305,8 +311,10 @@ SIMMY.Sphere.prototype.nodeBelow = function(node) {
         proj: node.position.clone()
     };
 };
+*/
 
-
+SIMMY.Plane = COLLISIONS.Plane;
+SIMMY.Sphere = COLLISIONS.Sphere;
 
 
 export { SIMMY };
