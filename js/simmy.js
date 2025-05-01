@@ -99,19 +99,39 @@ SIMMY.SpringMesh.prototype.calcInfluence = function(collisionObjects, tdelta) {
                 
                 // Check plane collisions
                 for (let n = 0; n < collisionObjects.planes.length; n++) {
-                    const ret = collisionObjects.planes[n].nodeBelow(node);
+                    const plane = collisionObjects.planes[n];
+                    const ret = plane.nodeBelow(node);
                     if (ret.status) {
-                        node.position.copy(ret.proj);
-                        node.velocityVec.set(0,0,0);
+                        const offset = 0.001;
+                        node.position.copy(ret.proj.add(plane.normal.clone().multiplyScalar(offset)));
+                        
+                        // Calculate bounce with capped restitution
+                        const restitution = 0.2;
+                        const normal = plane.normal.clone();
+                        const vDotN = node.velocityVec.dot(normal);
+
+                        if (vDotN < 0) {
+                            node.velocityVec.add(normal.multiplyScalar(-vDotN * (1 + restitution)));
+                        }
                     }
                 }
                 
                 // Check sphere collisions
                 for (let n = 0; n < collisionObjects.spheres.length; n++) {
-                    const ret = collisionObjects.spheres[n].nodeBelow(node);
+                    const sphere = collisionObjects.spheres[n];
+                    const ret = sphere.nodeBelow(node);
                     if (ret.status) {
-                        node.position.copy(ret.proj);
-                        node.velocityVec.set(0,0,0);
+                        const normal = node.position.clone().sub(sphere.center).normalize();
+                        
+                        // Move node slightly outside the sphere
+                        const offset = 0.001;
+                        node.position.copy(sphere.center.clone().add(normal.multiplyScalar(sphere.radius + offset)));
+                        const restitution = 0.2;
+                        const vDotN = node.velocityVec.dot(normal);
+            
+                        if (vDotN < 0) {
+                            node.velocityVec.add(normal.multiplyScalar(-vDotN * (1 + restitution)));
+                        }
                     }
                 }
             }
