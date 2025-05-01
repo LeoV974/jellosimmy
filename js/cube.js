@@ -6,7 +6,7 @@ SIMMY.Cube = function(xSize, ySize, zSize, xNodes, yNodes, zNodes, x, y, z, scen
     // Create geometry for the jello cube
     const geometry = new THREE.BufferGeometry();
     
-    const k_s = 50; // spring constant
+    const k_s = 100; // spring constant
     const nodesDict = {};
     
     const startX = x - xSize/2;
@@ -462,19 +462,29 @@ SIMMY.Cube = function(xSize, ySize, zSize, xNodes, yNodes, zNodes, x, y, z, scen
     
     // Disturb function to apply random force to jello
     this.disturb = function() {
-        // PROBLEM WITH THIS IS: as you have more nodes, the same force looks smaller and smaller
-        // I'll change it to shoving some % of the points later
-        // Apply force to center of mass rather than random node
         const midX = Math.floor(this.dimensions.xNodes / 2);
         const midY = Math.floor(this.dimensions.yNodes / 2);
         const midZ = Math.floor(this.dimensions.zNodes / 2);
 
         // randomly choose which direction to disturb, but always disturb with same magnitude of force
         // (avoids issue where sometimes you click it and it doesn't move much because it lowrolled all 3) 
-        const force = new THREE.Vector3(Math.round(Math.random()) * 100, Math.round(Math.random()) * 20, Math.round(Math.random()) * 100);
+        const forceDir = new THREE.Vector3(Math.round(Math.random()), Math.round(Math.random()), Math.round(Math.random()));
+        // just a multiplier in case u want to change the magnitude of the disturbing force
+        const multiplier = 0.5;
 
-        // const force = new THREE.Vector3((Math.random() - 0.5) * 16,3 + Math.random() * 9,(Math.random() - 0.5) * 16);
-        this.nodesDict[midX+"_"+midY+"_"+midZ].receiveInfluence(force, 0.1, true);
+        // apply it to a central cube of size half the full jello cube
+        for (i = Math.ceil(this.dimensions.xNodes / 4); i < Math.floor(3 * this.dimensions.xNodes / 4); i++) {
+            for (j = Math.ceil(this.dimensions.yNodes / 4); j < Math.floor(3 * this.dimensions.yNodes / 4); i++) {
+                for (k = Math.ceil(this.dimensions.zNodes / 4); k < Math.floor(3 * this.dimensions.zNodes / 4); i++) {
+                    // force scales down as you get further from the center (will be 0 on a face node)
+                    const force = new THREE.Vector3(multiplier * k_s * forceDir.x * Math.abs(i - midX) / this.dimensions.xNodes, 
+                                                    multiplier * k_s * forceDir.y * Math.abs(j - midY) / this.dimensions.yNodes, 
+                                                    multiplier * k_s * forceDir.z * Math.abs(k - midZ) / this.dimensions.zNodes);
+                    
+                    this.nodesDict[i+"_"+j+"_"+k].receiveInfluence(force, 0.1, true);
+                }
+            }
+        }
         
     };
 };

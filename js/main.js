@@ -178,7 +178,10 @@ class JelloSimulator {
     }
     
     setupScene() {
-        this.jelloCube = new SIMMY.Cube(2.5, 2.5, 2.5, 4, 4, 4, 0, 2, 0, this.scene);
+        const size = 2.5;
+        const nodes = 6;
+
+        this.jelloCube = new SIMMY.Cube(size, size, size, nodes, nodes, nodes, 0, 2, 0, this.scene);
         this.jelloCube.mesh.castShadow = true;
         this.jelloCube.mesh.receiveShadow = true;
         
