@@ -19,13 +19,7 @@ COLLISIONS.Plane = function (position, normal, width, height, scene) {
     this.mesh.position.copy(this.position);
 
     // Orient mesh to match normal
-    // if (normal.y === 1) {
-    //     this.mesh.rotation.x = -Math.PI / 2;
-    // } else if (normal.y === -1) {
-    //     this.mesh.rotation.x = Math.PI / 2;
-    // } else {
-        this.mesh.lookAt(this.position.clone().add(this.normal));
-    // }
+    this.mesh.lookAt(this.position.clone().add(this.normal));
 
     if (scene) scene.add(this.mesh);
 };

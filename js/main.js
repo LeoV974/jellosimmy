@@ -28,8 +28,9 @@ class JelloSimulator {
         this.isPaused = false;
         
         // Initialize collision objects
+        this.collisionObjects = [];
         this.collisionType = 'plane';
-        this.initCollisionObjects();
+        this.initPlaneScene();
         this.setupScene();
         
         this.animate = this.animate.bind(this);
@@ -173,21 +174,62 @@ class JelloSimulator {
         this.renderer.render(this.scene, this.camera);
     }
     
-    initCollisionObjects() {
-        // Create floor plane
-        this.floor = new COLLISIONS.Plane(new THREE.Vector3(0, -2, 0), new THREE.Vector3(0, 1, 0), 20, 20, this.scene);
+    initPlaneScene() {
+        const floor = new COLLISIONS.Plane(new THREE.Vector3(0, -2, 0), new THREE.Vector3(0, 1, 0), 20, 20, this.scene);
+        floor.mesh.receiveShadow = true;
+        this.simulator.addPlane(floor);
+        floor.mesh.visible = true;
+        
+        // Store reference to the type
+        floor.type = 'plane';
+        
+        // Add to the collisionObjects array
+        this.collisionObjects.push(floor);
+    }
+    
+    initSphereScene() {
+        const sphere = new COLLISIONS.Sphere(new THREE.Vector3(0, -5, 0), 2, this.scene);
+        sphere.mesh.receiveShadow = true;
+        this.simulator.addSphere(sphere);
+        sphere.mesh.visible = true;
+        
+        // Store reference to the type
+        sphere.type = 'sphere';
+        
+        // Add to the collisionObjects array
+        this.collisionObjects.push(sphere);
+    }
+    
+    initBoxScene() {
+        const box = new COLLISIONS.Box(-1, 1, -3, -1, -1, 1, this.scene);
+        box.mesh.receiveShadow = true;
+        this.simulator.addBox(box);
+        box.mesh.visible = true;
+        
+        // Store reference to the type
+        box.type = 'box';
+        
+        // Add to the collisionObjects array
+        this.collisionObjects.push(box);
+    }
+
+    initScene1() {
+        // just some placeholder stuff proof of concept that u can put multiple collision objects in 1 scene
+        this.floor = new COLLISIONS.Plane(new THREE.Vector3(1, -5, 1), new THREE.Vector3(-1, 1, 0), 10, 10, this.scene);
         this.floor.mesh.receiveShadow = true;
         this.simulator.addPlane(this.floor);
         
-        // Create sphere but don't add to simulator yet
-        this.sphere = new COLLISIONS.Sphere(new THREE.Vector3(0, -5, 0), 2, this.scene);
+        this.sphere = new COLLISIONS.Sphere(new THREE.Vector3(1, -1, 1), 1, this.scene);
         this.sphere.mesh.receiveShadow = true;
-        this.sphere.mesh.visible = false;
+        this.simulator.addSphere(this.sphere);
 
-        // Create a box
-        this.box = new COLLISIONS.Box(-1, 1, -3, -1, -1, 1, this.scene);
+        this.box = new COLLISIONS.Box(-2, 0, -3, -1, -2, 0, this.scene);
         this.box.mesh.receiveShadow = true;
-        this.box.mesh.visible = false;
+        this.simulator.addBox(this.box);
+
+        this.box2 = new COLLISIONS.Box(1, 2, -3, -1, 1, 2, this.scene);
+        this.box2.mesh.receiveShadow = true;
+        this.simulator.addBox(this.box2);
     }
     
     setupLights() {
@@ -230,58 +272,33 @@ class JelloSimulator {
         this.clearScene();
         
         if (type === 'plane') {
-            
-            // Add plane to simulator if not already there
-            if (this.simulator.planes.indexOf(this.floor) === -1) {
-                this.simulator.addPlane(this.floor);
-            }
-            this.floor.mesh.visible = true;
+            this.initPlaneScene();
         } else if (type === 'sphere') {
-
-            if (this.simulator.spheres.indexOf(this.sphere) === -1) {
-                this.simulator.addSphere(this.sphere);
-            }
-            this.sphere.mesh.visible = true;
-
+            this.initSphereScene();
         } else if (type == 'box') {
-
-            // for some rsn box isnt showing up rn
-            if (this.simulator.boxes.indexOf(this.box) === -1) {
-                this.simulator.addBox(this.box);
-            }
-            this.box.mesh.visible = true;
+            this.initBoxScene();
+        } else if (type == 'scene1') {
+            this.initScene1();
         }
         // todo: some other scenes 
-        // eg: tetrominos, falling through several objects
+        // eg: "tetrominos", falling between several objects like plinko
         // 
-        
         
         // Reset jello position
         this.resetJello();
     }
 
     clearScene() {
-        // Remove plane from simulator
-        const planeIndex = this.simulator.planes.indexOf(this.floor);
-        if (planeIndex !== -1) {
-            this.simulator.planes.splice(planeIndex, 1);
-        }
-        // Remove sphere from simulator
-        const sphereIndex = this.simulator.spheres.indexOf(this.sphere);
-        if (sphereIndex !== -1) {
-            this.simulator.spheres.splice(sphereIndex, 1);
-        }
-        // remove box from simulator
-        const boxIndex = this.simulator.boxes.indexOf(this.box);
-        if (boxIndex !== -1) {
-            this.simulator.spheres.splice(boxIndex, 1);
+        // hide all objects
+        for (const obj of this.collisionObjects) {
+            
+            obj.mesh.visible = false;
         }
 
-        // hide everything
-        this.floor.mesh.visible = false;
-        this.sphere.mesh.visible = false;
-        this.box.mesh.visible = false;
-        // TODO 
+        // clear all objects
+        this.simulator.planes = [];
+        this.simulator.spheres = [];
+        this.simulator.boxes = [];
     }
     
     animate() {
@@ -466,8 +483,5 @@ JelloSimulator.prototype.setElasticity = function(value) {
 
 
 document.addEventListener('DOMContentLoaded', () => {
-    // document.getElementById('collisionType').value = "plane";
-    // document.getElementById('shaderType').value = "phong";
-    const app = new JelloSimulator();
-    
+    const app = new JelloSimulator();   
 });
