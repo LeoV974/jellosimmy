@@ -29,7 +29,7 @@ SIMMY.Simulator.prototype.addSphere = function(obj) {
     this.collisionObjects.push(obj);
 };
 
-SIMMY.Simulator.prototype.addBpx = function(obj) {
+SIMMY.Simulator.prototype.addBox = function(obj) {
     obj.type = 'box';
     this.boxes.push(obj); // temporary
     this.collisionObjects.push(obj);
@@ -204,6 +204,8 @@ SIMMY.SpringMesh.prototype.calcInfluence = function(scene, tdelta) {
                     const box = scene.boxes[n];
                     const ret = box.nodeBelow(node);
                     if (ret.status) {
+                        node.position.copy(ret.proj);
+                        node.velocityVec.set(0,0,0);
                         // lol
                         // I don't want to do this stuff yet bc I would like to consolidate all collision objects into one loop
                         // and if possible have collisions be handled by creating an imaginary collision spring
