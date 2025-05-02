@@ -7,7 +7,7 @@ import { COLLISIONS } from './collision.js';
 class JelloSimulator {
     constructor() {
         this.scene = new THREE.Scene();
-        this.scene.background = new THREE.Color(0x222233);
+        this.scene.background = new THREE.Color(document.getElementById('bgColorPicker').value);
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         this.camera.position.set(5, 4, 5);
         this.renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -52,6 +52,10 @@ class JelloSimulator {
 
         document.getElementById('shaderType').addEventListener('change', (e) => {
             this.changeShader(e.target.value);
+        });
+
+        document.getElementById('bgColorPicker').addEventListener('input', (e) => {
+            this.scene.background = new THREE.Color(e.target.value);
         });
 
         this.windForce = new THREE.Vector3(0, 0, 0);
