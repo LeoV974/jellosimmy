@@ -10,7 +10,7 @@ SIMMY.Simulator = function(gravity) {
     this.planes = [];
     this.spheres = [];
     this.boxes = [];
-    this.k_collision = 500; // change this to adjust how "bouncy" collisions are
+    // this.k_collision = 500; // change this to adjust how "bouncy" collisions are
 };
 
 SIMMY.Simulator.prototype.addSpringMesh = function(obj) {
@@ -114,16 +114,16 @@ SIMMY.Simulator.prototype.update = function(tdelta) {
         this.springMeshes[i].applyForces(tdelta);
     }
     
-    // // handle collisions with other primitives. 
-    // for (let i = 0; i < this.planes.length; i++) {
-    //     this.springMeshes[i].handleCollisions(this.planes[i]);
-    // }
-    // for (let i = 0; i < this.spheres.length; i++) {
-    //     this.springMeshes[i].handleCollisions(this.spheres[i]);
-    // }
-    // for (let i = 0; i < this.boxes.length; i++) {
-    //     this.springMeshes[i].handleCollisions(this.boxes[i]);
-    // }
+    // handle collisions with other primitives. 
+    for (let i = 0; i < this.planes.length; i++) {
+        this.springMeshes[i].handleCollisions(this.planes[i]);
+    }
+    for (let i = 0; i < this.spheres.length; i++) {
+        this.springMeshes[i].handleCollisions(this.spheres[i]);
+    }
+    for (let i = 0; i < this.boxes.length; i++) {
+        this.springMeshes[i].handleCollisions(this.boxes[i]);
+    }
 
 }
 
@@ -214,7 +214,6 @@ SIMMY.SpringMesh.prototype.applyForces = function(tdelta) {
                 // update position
                 const posDiff = node.velocityVec.clone().multiplyScalar(tdelta);
                 
-                // HERMAN HELP ME
                 // WHY IS NODE.POSITION NULL???
                 // console.log("191");
                 // console.log(node.position.clone()); // prints numbers
@@ -249,9 +248,9 @@ SIMMY.SpringMesh.prototype.handleCollisions = function(obj) {
                 // force of imaginary collision spring
                 // todo: decide wheres the best place to store k_collision
                 // todo: ret doesn't have normal rn herman said he added it so I'll have to merge those changes later
-                // const collision_force = ret.normal.clone().normalize().multiplyScalar(scene.k_collision * distance);
+                const collision_force = ret.normal.clone().normalize().multiplyScalar(this.k_collision * distance);
             
-                // node.aVec.add(collision_force);
+                node.aVec.add(collision_force);
                 }
                 
             }
