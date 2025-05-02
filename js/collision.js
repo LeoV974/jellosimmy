@@ -35,7 +35,8 @@ COLLISIONS.Plane.prototype.nodeBelow = function (node) {
         return {
             status: true,
             proj: projPoint,
-            reflectedVel: reflectedVelocity
+            reflectedVel: reflectedVelocity,
+            normal: this.normal
         };
     }
     return {
@@ -86,7 +87,8 @@ COLLISIONS.Sphere.prototype.nodeBelow = function (node) {
         return {
             status: true,
             proj: projPoint,
-            reflectedVel: reflectedVelocity
+            reflectedVel: reflectedVelocity,
+            normal: direction
         };
     }
 
