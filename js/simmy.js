@@ -31,17 +31,6 @@ SIMMY.Simulator.prototype.addBox = function(obj) {
     this.boxes.push(obj);
 };
 
-SIMMY.Simulator.prototype.update = function(tdelta) {
-    // zero things every timestep, then actually evaluate the force
-    let i;
-    for (i = 0; i < this.springMeshes.length; i++) {
-        this.springMeshes[i].calcGravity(this.gravity,this.wind || new THREE.Vector3(0,0,0), tdelta);
-    }
-    for (i = 0; i < this.springMeshes.length; i++) {
-        this.springMeshes[i].calcInfluence(this, tdelta);
-    }
-};
-
 SIMMY.Simulator.prototype.setWind = function(windForce) {
     this.wind = windForce;
   };
@@ -59,8 +48,8 @@ SIMMY.SpringMesh.prototype.addNode = function(i, j, k, node) {
         this.nodes[i][j] = [];
     }
     this.nodes[i][j][k] = node;
-    const sphere = new THREE.Sphere(node.position, 30);
-    this.spheres.push(sphere);
+    this.linearSprings = [];
+    this.angleSprings = [];
 };
 
 SIMMY.SpringNode = function(position, mass) {
@@ -101,14 +90,20 @@ SIMMY.Simulator.prototype.update = function(tdelta) {
     for (let i = 0; i < this.springMeshes.length; i++) {
         this.springMeshes[i].resetForces();
     }
-    // add external accelerations (gravity, wind) to total_force.
-
-    // for each spring, apply correction force to each endpoint.
     
-    // use implicit euler to compute new point mass positions.
+    for (let i = 0; i < this.springMeshes.length; i++) {
+        // add external accelerations (gravity, wind) to total_force.
+        this.springMeshes[i].calcExternalForces(this.gravity.add(this.wind));
 
-    // handle collisions with other primitives. 
+        // for each spring, apply correction force to each endpoint.
+        this.springMeshes[i].calcSpringForces();
 
+        // use implicit euler to compute new point mass positions.
+        this.springMeshes[i].applyForces();
+
+        // handle collisions with other primitives. 
+        // ASUIOUJFIOWEJFIOWEJF 
+    }
     
 }
 
@@ -119,12 +114,82 @@ SIMMY.SpringMesh.prototype.resetForces = function() {
             for (let k = 0; k < this.nodes[i][j].length; k++) {
                 node = this.nodes[i][j][k];
                 node.forceVec.set(0, 0, 0);
-                // node.forceApplied = false;
             }
         }
     }
 };
 
+// for gravity, wind, etc
+SIMMY.SpringMesh.prototype.calcExternalForces = function(externalForces) {
+    let node;
+    for (let i = 0; i < this.nodes.length; i++) {
+        for (let j = 0; j < this.nodes[i].length; j++) {
+            for (let k = 0; k < this.nodes[i][j].length; k++) {
+                node = this.nodes[i][j][k];
+                node.forceVec.add(externalForces);
+            }
+        }
+    }
+};
+
+SIMMY.SpringMesh.prototype.calcSpringForces = function() {
+    let spring;
+    let nodeA;
+    let nodeB;
+    for (let i = 0; i < this.linearSprings.length; i++) {
+        spring = this.linearSprings[i];
+        nodeA = spring.node1;
+        nodeB = spring.node2;
+        // exert influence on its point nodes
+        // ??
+    }
+    let angleSpring;
+    let s1;
+    let s2;
+    for (let i = 0; i < this.angleSprings.length; i++) {
+        spring = this.angleSprings[i];
+        // TODO fml
+    }
+};
+
+SIMMY.SpringMesh.prototype.applyForces = function(tdelta) {
+    // implicit Euler
+    let node;
+    for (let i = 0; i < this.nodes.length; i++) {
+        for (let j = 0; j < this.nodes[i].length; j++) {
+            for (let k = 0; k < this.nodes[i][j].length; k++) {
+                node = this.nodes[i][j][k];
+                
+                // F = ma
+                const aVec = node.forceVec.clone().multiplyScalar(1/node.mass);
+                
+                // update velocity before updating position (so we use future velocity)
+                const vDiff = aVec.clone().multiplyScalar(tdelta);
+                node.velocityVec.add(vDiff);
+
+                // update position
+                const posDiff = node.velocityVec.clone().multiplyScalar(tdelta);
+                node.position.add(posDiff);
+            }
+        }
+    }
+    
+}
+
+
+
+
+
+// SIMMY.Simulator.prototype.update = function(tdelta) {
+//     // zero things every timestep, then actually evaluate the force
+//     let i;
+//     for (i = 0; i < this.springMeshes.length; i++) {
+//         this.springMeshes[i].calcGravity(this.gravity,this.wind || new THREE.Vector3(0,0,0), tdelta);
+//     }
+//     for (i = 0; i < this.springMeshes.length; i++) {
+//         this.springMeshes[i].calcInfluence(this, tdelta);
+//     }
+// };
 
 // SIMMY.SpringNode.prototype.updatePosition = function(posDiff) {
 //     this.position.add(posDiff);
