@@ -65,8 +65,6 @@ class JelloSimulator {
         // Start animation loop
         this.lastTime = Date.now();
         this.animate();
-        this.setupDebugControls();
-        this.enableDebugVisuals();
     }
 
     createWindIndicator() {

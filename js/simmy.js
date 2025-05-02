@@ -218,7 +218,7 @@ SIMMY.SpringNode.prototype.updatePosition = function(posDiff) {
 };
 
 SIMMY.SpringNode.prototype.receiveInfluence = function(forceVec, tdelta, override) {
-    const c = override ? 0.0 : 0.55;  // Damping factor
+    const c = override ? 0.0 : 0.6;  // Damping factor
     const realForce = forceVec.sub(this.velocityVec.clone().multiplyScalar(c));
     const aVec = realForce.clone().multiplyScalar(1/this.mass);
     const posDiff = this.velocityVec.clone().multiplyScalar(tdelta).add(aVec.clone().multiplyScalar(0.5 * tdelta * tdelta));
