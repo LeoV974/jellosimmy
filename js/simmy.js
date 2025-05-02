@@ -9,7 +9,7 @@ SIMMY.Simulator = function(gravity) {
     this.planes = [];
     this.spheres = [];
     this.boxes = [];
-    this.k_collision = 500; // change this to adjust how "bouncy" collisions are
+    this.k_collision = 5000; // change this to adjust how "bouncy" collisions are
 };
 
 SIMMY.Simulator.prototype.addSpringMesh = function(obj) {
@@ -114,7 +114,6 @@ SIMMY.SpringMesh.prototype.calcInfluence = function(scene, tdelta) {
         for (let j = 0; j < this.nodes[i].length; j++) {
             for (let k = 0; k < this.nodes[i][j].length; k++) {
                 node = this.nodes[i][j][k];
-
                 // Check plane collisions
                 for (let n = 0; n < scene.planes.length; n++) {
                     const plane = scene.planes[n];
@@ -125,6 +124,8 @@ SIMMY.SpringMesh.prototype.calcInfluence = function(scene, tdelta) {
                         // node.velocityVec.set(0,0,0);
 
 
+                        // force-based collision that kind of works but slides
+                        
                         // force of collision is modeled by k * d * n, 
                         // where k is a constant, d is the distance the particle has penetrated the surface, and n is the normal of the surface
                         const distance = node.position.distanceTo(ret.proj);
@@ -135,20 +136,7 @@ SIMMY.SpringMesh.prototype.calcInfluence = function(scene, tdelta) {
 
                         // ????
                         node.receiveInfluence(collision_force, tdelta);
-
-
-                        // velocity-based collision handling
-                        // const offset = 0.001;
-                        // node.position.copy(ret.proj.add(plane.normal.clone().multiplyScalar(offset)));
                         
-                        // // Calculate bounce with capped restitution
-                        // const restitution = 0.2;
-                        // const normal = plane.normal.clone();
-                        // const vDotN = node.velocityVec.dot(normal);
-
-                        // if (vDotN < 0) {
-                        //     node.velocityVec.add(normal.multiplyScalar(-vDotN * (1 + restitution)));
-                        // }
                     }
                 }
                 
@@ -157,9 +145,14 @@ SIMMY.SpringMesh.prototype.calcInfluence = function(scene, tdelta) {
                     const sphere = scene.spheres[n];
                     const ret = sphere.nodeBelow(node);
                     if (ret.status) {
+                        const distance = node.position.distanceTo(ret.proj);
+                        const normal = ret.proj.sub(sphere.center);
+                        const collision_force = normal.clone().normalize().multiplyScalar(scene.k_collision * distance);
+                        node.receiveInfluence(collision_force, tdelta);
+
                         // reverted to 0ing velocity
-                        node.position.copy(ret.proj); 
-                        node.velocityVec.set(0,0,0);
+                        // node.position.copy(ret.proj); 
+                        // node.velocityVec.set(0,0,0);
 
                         // const normal = node.position.clone().sub(sphere.center).normalize();
                         

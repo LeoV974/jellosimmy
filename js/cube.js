@@ -6,7 +6,7 @@ SIMMY.Cube = function(xSize, ySize, zSize, xNodes, yNodes, zNodes, x, y, z, scen
     // Create geometry for the jello cube
     const geometry = new THREE.BufferGeometry();
     
-    const k_s = 50; // spring constant
+    const k_s = 20; // spring constant
     const kAngleSpring = 20;   // Angle spring strength
     const nodesDict = {};
     
@@ -231,6 +231,92 @@ SIMMY.Cube = function(xSize, ySize, zSize, xNodes, yNodes, zNodes, x, y, z, scen
         }
     }
     
+    // adding springs across the full cube to help it not collapse
+    let cornerNodes = {
+        "000": nodesDict["0_0_0"],
+        "001": nodesDict["0_0_" + (zNodes - 1)],
+        "010": nodesDict["0_" + (yNodes - 1) + "_0"],
+        "011": nodesDict["0_" + (yNodes - 1) + "_" + (zNodes - 1)],
+        "100": nodesDict[(xNodes - 1) + "_0_0"],
+        "101": nodesDict[(xNodes - 1) + "_0_" + (zNodes - 1)],
+        "110": nodesDict[(xNodes - 1) + "_" + (yNodes - 1) + "_0"],
+        "111": nodesDict[(xNodes - 1) + "_" + (yNodes - 1) + "_" + (zNodes - 1)]
+    };
+    let s;
+    // along the 8 edges (this is half of them)?
+    // s = new SIMMY.Spring(cornerNodes["000"], cornerNodes["001"], xSize, k_s);
+    // cornerNodes["000"].addSpring(s);
+    // cornerNodes["001"].addSpring(s);
+    // s = new SIMMY.Spring(cornerNodes["000"], cornerNodes["010"], xSize, k_s);
+    // cornerNodes["000"].addSpring(s);
+    // cornerNodes["010"].addSpring(s);
+    // s = new SIMMY.Spring(cornerNodes["000"], cornerNodes["100"], xSize, k_s);
+    // cornerNodes["000"].addSpring(s);
+    // cornerNodes["100"].addSpring(s);
+    // s = new SIMMY.Spring(cornerNodes["000"], cornerNodes["010"], xSize, k_s);
+    // cornerNodes["000"].addSpring(s);
+    // cornerNodes["010"].addSpring(s);
+    
+    // cross body diagonals
+    const body_diag_distance = Math.sqrt(xSize * xSize + ySize * ySize + zSize * zSize);
+    const k_body_diag = 4 * k_s;
+    s = new SIMMY.Spring(cornerNodes["000"], cornerNodes["111"], body_diag_distance, k_body_diag);
+    cornerNodes["000"].addSpring(s);
+    cornerNodes["111"].addSpring(s);
+    s = new SIMMY.Spring(cornerNodes["001"], cornerNodes["110"], body_diag_distance, k_body_diag);
+    cornerNodes["001"].addSpring(s);
+    cornerNodes["110"].addSpring(s);
+    s = new SIMMY.Spring(cornerNodes["010"], cornerNodes["100"], body_diag_distance, k_body_diag);
+    cornerNodes["010"].addSpring(s);
+    cornerNodes["101"].addSpring(s);
+    s = new SIMMY.Spring(cornerNodes["100"], cornerNodes["011"], body_diag_distance, k_body_diag);
+    cornerNodes["100"].addSpring(s);
+    cornerNodes["011"].addSpring(s);
+    // face diagonals, not sure if neccessary
+    // const xy_diag_distance = Math.sqrt(xSize * xSize + ySize * ySize);
+    // const yz_diag_distance = Math.sqrt(ySize * ySize + zSize * zSize);
+    // const xz_diag_distance = Math.sqrt(xSize * xSize + zSize * zSize);
+    // const k_face_diag = k_s;
+
+    // s = new SIMMY.Spring(cornerNodes["000"], cornerNodes["110"], xy_diag_distance, k_face_diag);
+    // cornerNodes["000"].addSpring(s);
+    // cornerNodes["110"].addSpring(s);
+    // s = new SIMMY.Spring(cornerNodes["100"], cornerNodes["010"], xy_diag_distance, k_face_diag);
+    // cornerNodes["100"].addSpring(s);
+    // cornerNodes["010"].addSpring(s);
+    // s = new SIMMY.Spring(cornerNodes["001"], cornerNodes["111"], xy_diag_distance, k_face_diag);
+    // cornerNodes["001"].addSpring(s);
+    // cornerNodes["111"].addSpring(s);
+    // s = new SIMMY.Spring(cornerNodes["101"], cornerNodes["011"], xy_diag_distance, k_face_diag);
+    // cornerNodes["101"].addSpring(s);
+    // cornerNodes["011"].addSpring(s);
+    // s = new SIMMY.Spring(cornerNodes["000"], cornerNodes["101"], xz_diag_distance, k_face_diag);
+    // cornerNodes["000"].addSpring(s);
+    // cornerNodes["101"].addSpring(s);
+    // s = new SIMMY.Spring(cornerNodes["100"], cornerNodes["001"], xz_diag_distance, k_face_diag);
+    // cornerNodes["100"].addSpring(s);
+    // cornerNodes["001"].addSpring(s);
+    // s = new SIMMY.Spring(cornerNodes["010"], cornerNodes["111"], xz_diag_distance, k_face_diag);
+    // cornerNodes["010"].addSpring(s);
+    // cornerNodes["111"].addSpring(s);
+    // s = new SIMMY.Spring(cornerNodes["110"], cornerNodes["011"], xz_diag_distance, k_face_diag);
+    // cornerNodes["110"].addSpring(s);
+    // cornerNodes["011"].addSpring(s);
+    // s = new SIMMY.Spring(cornerNodes["000"], cornerNodes["011"], yz_diag_distance, k_face_diag);
+    // cornerNodes["000"].addSpring(s);
+    // cornerNodes["011"].addSpring(s);
+    // s = new SIMMY.Spring(cornerNodes["010"], cornerNodes["001"], yz_diag_distance, k_face_diag);
+    // cornerNodes["010"].addSpring(s);
+    // cornerNodes["001"].addSpring(s);
+    // s = new SIMMY.Spring(cornerNodes["100"], cornerNodes["111"], yz_diag_distance, k_face_diag);
+    // cornerNodes["100"].addSpring(s);
+    // cornerNodes["111"].addSpring(s);
+    // s = new SIMMY.Spring(cornerNodes["110"], cornerNodes["101"], yz_diag_distance, k_face_diag);
+    // cornerNodes["110"].addSpring(s);
+    // cornerNodes["101"].addSpring(s);
+
+
+
     // Create faces for rendering
     const positions = [];
     const indices = [];
