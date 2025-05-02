@@ -257,6 +257,9 @@ class JelloSimulator {
             this.initSphere(new THREE.Vector3(1, -1, 1), 1);
             this.initBox(-2, 0, -3, -1, -2, 0);
             this.initBox(1, 2, -3, -1, 1, 2);
+        } else if (type == 'scene2') {
+            // incline plane scene
+            this.initPlane(new THREE.Vector3(1, -3, 1), new THREE.Vector3(-1, 1, 0), 10, 10);
         }
         // todo: some other scenes 
         // eg: "tetrominos", falling between several objects like plinko
