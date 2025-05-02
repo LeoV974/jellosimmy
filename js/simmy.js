@@ -5,7 +5,7 @@ const SIMMY = {};
 
 SIMMY.Simulator = function(gravity) {
     this.gravity = gravity || new THREE.Vector3(0,-9.8,0);
-    this.wind = 0;
+    this.wind = new THREE.Vector3(0,0,0);
     this.springMeshes = [];
     this.planes = [];
     this.spheres = [];
@@ -56,8 +56,12 @@ SIMMY.SpringMesh.prototype.addNode = function(i, j, k, node) {
 SIMMY.SpringNode = function(position, mass) {
     this.velocityVec = new THREE.Vector3(0,0,0);
     this.position = position.clone();
-    // console.log(position);
-    // console.log(this.position);
+    // console.log("59");
+    // console.log(position.clone()); // prints numbers
+    // console.log("61");
+    // console.log(this.position.clone()); // prints numbers
+    // console.log("v");
+    // console.log(this.velocityVec.clone()); // 0,0,0 as expected
     this.mass = mass;
     this.linearSprings = [];
     this.angleSprings = [];
@@ -96,6 +100,9 @@ SIMMY.Simulator.prototype.update = function(tdelta) {
     
     for (let i = 0; i < this.springMeshes.length; i++) {
         // add external accelerations (gravity, wind) to total_force.
+        // const externalForces = this.gravity.add(this.wind);
+        // console.log("external forces");
+        // console.log(externalForces);
         this.springMeshes[i].calcExternalForces(this.gravity.add(this.wind));
 
         // for each spring, apply correction force to each endpoint.
@@ -137,7 +144,13 @@ SIMMY.SpringMesh.prototype.calcExternalForces = function(externalForces) {
         for (let j = 0; j < this.nodes[i].length; j++) {
             for (let k = 0; k < this.nodes[i][j].length; k++) {
                 node = this.nodes[i][j][k];
+                // console.log("forceVec before add");
+                // console.log(node.forceVec);
+                // console.log("external forces");
+                // console.log(externalForces);
                 node.forceVec.add(externalForces);
+                // console.log("forceVec after add");
+                // console.log(node.forceVec);
             }
         }
     }
@@ -175,18 +188,37 @@ SIMMY.SpringMesh.prototype.applyForces = function(tdelta) {
             for (let k = 0; k < this.nodes[i][j].length; k++) {
                 node = this.nodes[i][j][k];
                 
+                // console.log("forceVec");
+                // console.log(node.forceVec);
+                
                 // F = ma
                 const aVec = node.forceVec.clone().multiplyScalar(1/node.mass);
+                // console.log("aVec");
+                // console.log(aVec);
                 
                 // update velocity before updating position (so we use future velocity)
+                console.log("velocity before update");
+                console.log(node.velocityVec.clone()); // WHY IS THIS NAN
+
                 const vDiff = aVec.clone().multiplyScalar(tdelta);
+
+                // console.log("vDiff");
+                // console.log(vDiff);
+
                 node.velocityVec.add(vDiff);
 
                 // update position
                 const posDiff = node.velocityVec.clone().multiplyScalar(tdelta);
+                
                 // HERMAN HELP ME
                 // WHY IS NODE.POSITION NULL???
-                node.position.add(posDiff);
+                // console.log("191");
+                // console.log(node.position.clone()); // prints numbers
+                // console.log("posDiff");
+                // console.log(posDiff.clone());
+                // const newPos = node.position.clone().add(posDiff);
+                // console.log("newPos");
+                // console.log(newPos);
             }
         }
     }
@@ -200,18 +232,22 @@ SIMMY.SpringMesh.prototype.handleCollisions = function(obj) {
             for (let k = 0; k < this.nodes[i][j].length; k++) {
                 node = this.nodes[i][j][k];
 
+                // console.log("205");
+                // console.log(node.position.clone());
                 const ret = obj.nodeBelow(node);
                 if (ret.status) {
                 // force of collision is modeled by k * d * n, 
                 // where k is a constant, d is the distance the particle has penetrated the surface, and n is the normal of the surface
+                
+                
                 const distance = node.position.distanceTo(ret.proj);
 
                 // force of imaginary collision spring
                 // todo: decide wheres the best place to store k_collision
                 // todo: ret doesn't have normal rn herman said he added it so I'll have to merge those changes later
-                const collision_force = ret.normal.clone().normalize().multiplyScalar(scene.k_collision * distance);
+                // const collision_force = ret.normal.clone().normalize().multiplyScalar(scene.k_collision * distance);
             
-                node.aVec.add(collision_force);
+                // node.aVec.add(collision_force);
                 }
                 
             }
