@@ -29,13 +29,9 @@ SIMMY.Cube = function(xSize, ySize, zSize, xNodes, yNodes, zNodes, x, y, z, scen
             for (k = 0; k < zNodes; k++) {
                 const currentZ = startZ + k*diffZ;
                 let position = new THREE.Vector3(currentX, currentY, currentZ);
-                // console.log(position); // PRINTS NUMBERS
                 node = new SIMMY.SpringNode(position, 1);
-                // console.log(node.position.clone()); // PRINTS NUMBERS
                 this.addNode(i, j, k, node);
                 nodesDict[i+"_"+j+"_"+k] = node;
-                // console.log(nodesDict[i+"_"+j+"_"+k].clone()); // tells me every object's position is NaN?
-                // console.log(nodesDict[i+"_"+j+"_"+k].position.clone()); // PRINTS NUMBERS
             }
         }
     }
@@ -236,18 +232,6 @@ SIMMY.Cube = function(xSize, ySize, zSize, xNodes, yNodes, zNodes, x, y, z, scen
             }
         }
     }
-
-    // HERMAN LOOK HERE
-    // this says that everything in the nodesDict has position NaN
-    for (i = 0; i < xNodes; i++) {
-        for (j = 0; j < yNodes; j++) {
-            for (k = 0; k < zNodes; k++) {
-                // console.log("cube.js 245");
-                // console.log(nodesDict[i+"_"+j+"_"+k].position.clone()); // prints numbers
-            }
-        }
-    }
-
     
     // Create faces for rendering
     const positions = [];
