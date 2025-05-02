@@ -3,6 +3,8 @@ import { COLLISIONS } from './collision.js';
 
 const SIMMY = {};
 
+
+///////////////////////////// SIMUALATOR /////////////////////////////
 SIMMY.Simulator = function(gravity) {
     this.gravity = gravity || new THREE.Vector3(0,-9.8,0);
     this.springMeshes = [];
@@ -45,6 +47,7 @@ SIMMY.Simulator.prototype.setWind = function(windForce) {
     this.wind = windForce;
   };
 
+///////////////////////////// SPRING MESH /////////////////////////////
 SIMMY.SpringMesh = function() {
     this.nodes = [];
     this.spheres = [];
@@ -135,7 +138,19 @@ SIMMY.SpringMesh.prototype.calcInfluence = function(scene, tdelta) {
                         console.log(collision_force);
 
                         // ????
-                        node.receiveInfluence(collision_force, tdelta);
+                        // node.receiveInfluence(collision_force, tdelta);
+                        // if (node.velocityVec.length() > 15){
+                        //     // Position correction - add a small offset to prevent sticking
+                        //     const offset = 0.05;
+                        //     const offsetPosition = ret.proj.clone().add(
+                        //         planes.planes[n].normal.clone().multiplyScalar(offset)
+                        //     );
+                        //     node.position.copy(offsetPosition);
+                        //     node.velocityVec.copy(ret.reflectedVel);
+                        // } else{
+                        //     node.position.copy(ret.proj);
+                        //     node.velocityVec.set(0,0,0);
+                        // }
                         
                     }
                 }
@@ -186,6 +201,7 @@ SIMMY.SpringMesh.prototype.calcInfluence = function(scene, tdelta) {
     }
 };
 
+///////////////////////////// SPRING NODE /////////////////////////////
 SIMMY.SpringNode = function(position, mass) {
     this.velocityVec = new THREE.Vector3(0,0,0);
     this.position = position;
@@ -230,6 +246,7 @@ SIMMY.SpringNode.prototype.sendInfluence = function(tdelta) {
     }
 };
 
+///////////////////////////// SPRINGS /////////////////////////////
 SIMMY.Spring = function(node1, node2, length, k) {
     this.node1 = node1;
     this.node2 = node2;
