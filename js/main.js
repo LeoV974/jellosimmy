@@ -239,6 +239,22 @@ class JelloSimulator {
         
         this.simulator.addSpringMesh(this.jelloCube);
         this.createWindIndicator();
+        
+        // this.tetromino = new SIMMY.TTetromino(
+        //     2.5, 
+        //     4, 
+        //     0, 2, 0, 
+        //     this.scene
+        // );
+        // // Add tetromino to simulator
+        // this.tetromino.addToSimulator(this.simulator);
+        // for (let i = 0; i < this.tetromino.cubes.length; i++) {
+        //     this.simulator.addSpringMesh(this.tetromino.cubes[i]);
+        // }
+        
+        // // Update references for the animation loop
+        // // Replace original jelloCube with tetromino
+        // this.jelloCube = this.tetromino;
     }
     
     switchCollisionType(type) {
