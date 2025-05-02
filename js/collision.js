@@ -28,8 +28,19 @@ COLLISIONS.Plane.prototype.nodeBelow = function (node) {
     const projPoint = new THREE.Vector3();
     this.plane.projectPoint(node.position, projPoint);
     const nodeVec = node.position.clone().sub(projPoint).normalize();
+    const isBelowPlane = nodeVec.dot(this.normal) < 0;
+    if (isBelowPlane) {
+        // Calculate reflected velocity
+        const reflectedVelocity = this.reflectVelocity(node.velocityVec.clone(), this.normal, this.elasticity);
+        return {
+            status: true,
+            proj: projPoint,
+            reflectedVel: reflectedVelocity,
+            normal: this.normal
+        };
+    }
     return {
-        status: nodeVec.dot(this.normal) < 0,
+        status: false,
         proj: projPoint
     };
 };
@@ -63,9 +74,14 @@ COLLISIONS.Sphere.prototype.nodeBelow = function (node) {
         const direction = nodeToCenter.normalize();
         const projPoint = this.center.clone().add(direction.multiplyScalar(this.radius));
 
+        // Calculate reflected velocity (direction is the normal at the contact point)
+        const reflectedVelocity = this.reflectVelocity(node.velocityVec.clone(), direction, this.elasticity);
+        
         return {
             status: true,
-            proj: projPoint
+            proj: projPoint,
+            reflectedVel: reflectedVelocity,
+            normal: direction
         };
     }
 
@@ -74,6 +90,13 @@ COLLISIONS.Sphere.prototype.nodeBelow = function (node) {
         proj: node.position.clone()
     };
 };
+
+COLLISIONS.Sphere.prototype.reflectVelocity = function(velocity, normal, elasticity) {
+    // Calculate reflected velocity: v' = v - 2(v·n)n
+    const dotProduct = velocity.dot(normal);
+    const reflection = velocity.sub(normal.clone().multiplyScalar(2 * dotProduct));
+    return reflection.multiplyScalar(elasticity);
+}
 
 
 COLLISIONS.Box = function (xMin, xMax, yMin, yMax, zMin, zMax, scene) {
