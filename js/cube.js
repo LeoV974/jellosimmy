@@ -9,7 +9,6 @@ SIMMY.Cube = function(xSize, ySize, zSize, xNodes, yNodes, zNodes, x, y, z, scen
     const k_s = 50; // spring constant
     const kAngleSpring = 20;   // Angle spring strength
     const nodesDict = {};
-    const k_collision = 1000; // bounciness of collisions
     this.linearSprings = [];
     this.angleSprings = [];
     
