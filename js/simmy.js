@@ -10,7 +10,9 @@ SIMMY.Simulator = function(gravity) {
     this.planes = [];
     this.spheres = [];
     this.boxes = [];
-    this.k_collision = 500; // change this to adjust how "bouncy" collisions are
+    this.k_collision = 1000; // change this to adjust how "bouncy" collisions are
+    // idk im having the problem where at like 80 it bounces way too far
+    // but any lower and it falls through the plane
 };
 
 SIMMY.Simulator.prototype.addSpringMesh = function(obj) {

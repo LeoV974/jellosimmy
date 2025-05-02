@@ -88,7 +88,7 @@ COLLISIONS.Sphere.prototype.nodeBelow = function (node) {
             status: true,
             proj: projPoint,
             reflectedVel: reflectedVelocity,
-            normal: direction
+            normal: direction.multiplyScalar(-1)
         };
     }
 
@@ -170,24 +170,33 @@ COLLISIONS.Box.prototype.nodeBelow = function (node) {
         
         // Project to closest face
         let projPoint = node.position.clone();
+        let direction;
         
         if (minDist === distToXMin) {
             projPoint.x = this.xMin - 0.05; // Push slightly outside
+            direction = new THREE.Vector3(-1, 0, 0);
         } else if (minDist === distToXMax) {
             projPoint.x = this.xMax + 0.05; // Push slightly outside
+            direction = new THREE.Vector3(1, 0, 0);
         } else if (minDist === distToYMin) {
             projPoint.y = this.yMin - 0.05; // Push slightly outside
+            direction = new THREE.Vector3(0, -1, 0);
         } else if (minDist === distToYMax) {
             projPoint.y = this.yMax + 0.05; // Push slightly outside
+            direction = new THREE.Vector3(0, 1, 0);
         } else if (minDist === distToZMin) {
             projPoint.z = this.zMin - 0.05; // Push slightly outside
+            direction = new THREE.Vector3(0, 0, -1);
         } else if (minDist === distToZMax) {
             projPoint.z = this.zMax + 0.05; // Push slightly outside
+            direction = new THREE.Vector3(0, 0, 1);
         }
         
         return {
             status: true,
-            proj: projPoint
+            proj: projPoint,
+            normal: direction
+            // todo: reflected Vel
         };
     }
     
