@@ -97,7 +97,7 @@ SIMMY.Simulator.prototype.update = function(tdelta) {
         this.springMeshes[i].calcExternalForces(this.gravity.add(this.wind));
 
         // for each spring, apply correction force to each endpoint.
-        this.springMeshes[i].calcSpringForces();
+        // this.springMeshes[i].calcSpringForces();
 
         // use implicit euler to compute new point mass positions.
         this.springMeshes[i].applyForces();
@@ -143,8 +143,8 @@ SIMMY.SpringMesh.prototype.calcSpringForces = function() {
         const forceMagnitude = (spring.length - newLength) * spring.k;
         
         const force = dir.multiplyScalar(forceMagnitude);
-        spring.node1.forceVec.add(dir.multiplyScalar(-force * spring.node1.mass));
-        spring.node2.forceVec.add(dir.multiplyScalar(force * spring.node2.mass));
+        spring.node1.forceVec.add(dir.multiplyScalar(-force));
+        spring.node2.forceVec.add(dir.multiplyScalar(force));
     }
     let angleSpring;
     for (let i = 0; i < this.angleSprings.length; i++) {
@@ -170,7 +170,10 @@ SIMMY.SpringMesh.prototype.applyForces = function(tdelta) {
 
                 // update position
                 const posDiff = node.velocityVec.clone().multiplyScalar(tdelta);
+                // WHY IS NODE.POSITION NULL???
                 node.position.add(posDiff);
+                
+
             }
         }
     }

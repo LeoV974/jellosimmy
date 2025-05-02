@@ -9,6 +9,8 @@ SIMMY.Cube = function(xSize, ySize, zSize, xNodes, yNodes, zNodes, x, y, z, scen
     const k_s = 50; // spring constant
     const kAngleSpring = 20;   // Angle spring strength
     const nodesDict = {};
+    this.linearSprings = [];
+    this.angleSprings = [];
     
     const startX = x - xSize/2;
     const startY = y - ySize/2;
@@ -230,6 +232,15 @@ SIMMY.Cube = function(xSize, ySize, zSize, xNodes, yNodes, zNodes, x, y, z, scen
             }
         }
     }
+    
+    for (i = 0; i < xNodes; i++) {
+        for (j = 0; j < yNodes; j++) {
+            for (k = 0; k < zNodes; k++) {
+                console.log(nodesDict[i+"_"+j+"_"+k]);
+            }
+        }
+    }
+
     
     // Create faces for rendering
     const positions = [];
