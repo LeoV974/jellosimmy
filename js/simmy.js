@@ -55,6 +55,8 @@ SIMMY.SpringMesh.prototype.addNode = function(i, j, k, node) {
 
 SIMMY.SpringNode = function(position, mass) {
     this.velocityVec = new THREE.Vector3(0,0,0);
+    // console.log("58");
+    // console.log(this.velocityVec.clone());
     this.position = position.clone();
     // console.log("59");
     // console.log(position.clone()); // prints numbers
@@ -109,19 +111,19 @@ SIMMY.Simulator.prototype.update = function(tdelta) {
         this.springMeshes[i].calcSpringForces();
 
         // use implicit euler to compute new point mass positions.
-        this.springMeshes[i].applyForces();
+        this.springMeshes[i].applyForces(tdelta);
     }
     
-    // handle collisions with other primitives. 
-    for (let i = 0; i < this.planes.length; i++) {
-        this.springMeshes[i].handleCollisions(this.planes[i]);
-    }
-    for (let i = 0; i < this.spheres.length; i++) {
-        this.springMeshes[i].handleCollisions(this.spheres[i]);
-    }
-    for (let i = 0; i < this.boxes.length; i++) {
-        this.springMeshes[i].handleCollisions(this.boxes[i]);
-    }
+    // // handle collisions with other primitives. 
+    // for (let i = 0; i < this.planes.length; i++) {
+    //     this.springMeshes[i].handleCollisions(this.planes[i]);
+    // }
+    // for (let i = 0; i < this.spheres.length; i++) {
+    //     this.springMeshes[i].handleCollisions(this.spheres[i]);
+    // }
+    // for (let i = 0; i < this.boxes.length; i++) {
+    //     this.springMeshes[i].handleCollisions(this.boxes[i]);
+    // }
 
 }
 
@@ -193,17 +195,19 @@ SIMMY.SpringMesh.prototype.applyForces = function(tdelta) {
                 
                 // F = ma
                 const aVec = node.forceVec.clone().multiplyScalar(1/node.mass);
-                // console.log("aVec");
-                // console.log(aVec);
                 
                 // update velocity before updating position (so we use future velocity)
-                console.log("velocity before update");
-                console.log(node.velocityVec.clone()); // WHY IS THIS NAN
 
+                // console.log("aVec");
+                // console.log(aVec.clone());
+                // console.log("velocity before update 283");
+                // console.log(node.velocityVec.clone()); // NO LONGER NAN
+                // console.log("tdelta");
+                // console.log(tdelta);
                 const vDiff = aVec.clone().multiplyScalar(tdelta);
 
                 // console.log("vDiff");
-                // console.log(vDiff);
+                // console.log(vDiff); // NO LONGER NAN
 
                 node.velocityVec.add(vDiff);
 
@@ -216,7 +220,7 @@ SIMMY.SpringMesh.prototype.applyForces = function(tdelta) {
                 // console.log(node.position.clone()); // prints numbers
                 // console.log("posDiff");
                 // console.log(posDiff.clone());
-                // const newPos = node.position.clone().add(posDiff);
+                node.position = node.position.clone().add(posDiff);
                 // console.log("newPos");
                 // console.log(newPos);
             }
