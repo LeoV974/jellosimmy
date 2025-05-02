@@ -45,6 +45,13 @@ COLLISIONS.Plane.prototype.nodeBelow = function (node) {
     };
 };
 
+COLLISIONS.Plane.prototype.reflectVelocity = function(velocity, normal, elasticity) {
+    // Calculate reflected velocity: v' = v - 2(v·n)n
+    const dotProduct = velocity.dot(normal);
+    const reflection = velocity.sub(normal.clone().multiplyScalar(2 * dotProduct));
+    return reflection.multiplyScalar(elasticity);
+};
+
 COLLISIONS.Sphere = function (center, radius, scene, clr = new THREE.Color(0x888888)) {
     this.center = center || new THREE.Vector3(0, 0, 0);
     this.radius = radius || 5;
