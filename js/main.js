@@ -183,8 +183,8 @@ class JelloSimulator {
         this.collisionObjects.push(obj);
     }
 
-    initSphere(center, radius) {
-        const obj = new COLLISIONS.Sphere(center, radius, this.scene);
+    initSphere(center, radius, clr = new THREE.Color(0x888888)) {
+        const obj = new COLLISIONS.Sphere(center, radius, this.scene, clr);
         obj.mesh.receiveShadow = true;
         this.simulator.addPlane(obj);
         obj.mesh.visible = true;
@@ -273,7 +273,7 @@ class JelloSimulator {
             this.initPlane(new THREE.Vector3(0, -6, 0), new THREE.Vector3(-1, 1, 1), 20, 20);
         } else if (type == 'scene2') {
             // incline plane scene
-            this.initPlane(new THREE.Vector3(1, -3, 1), new THREE.Vector3(1, 1, 1), 10, 20);
+            this.initPlane(new THREE.Vector3(1, -4, 1), new THREE.Vector3(1, 1, 1), 10, 20);
         } else if (type == 'scene3') {
             this.initSphere(new THREE.Vector3(1.5, 0, 1.5), 1.25);
             this.initSphere(new THREE.Vector3(1.5, -2, -1.5), 1.25);
@@ -283,9 +283,37 @@ class JelloSimulator {
             this.initSphere(new THREE.Vector3(1.5, -10, -1.5), 1.25);
             this.initSphere(new THREE.Vector3(-1.5, -12, -1.5), 1.25);
             this.initSphere(new THREE.Vector3(-1.5, -14, +1.5), 1.25);
+        } else if (type == 'scene4') {
+            // Side boundaries
+            this.initPlane(new THREE.Vector3(-20, -7.5, 0), new THREE.Vector3(1, 0, 0), 50, 55);
+            this.initPlane(new THREE.Vector3(25, -7.5, 0), new THREE.Vector3(-1, 0, 0), 50, 55);
+
+            // Staggered grid of large spheres
+            const rows = 8;
+            const cols = 5;
+            const verticalSpacing = 8.5;
+            const horizontalSpacing = 8.5;
+            const startY = 20;
+            
+            for(let row = 0; row < rows; row++) {
+                const yPos = startY - (row * verticalSpacing);
+                const xOffset = (row % 2) * horizontalSpacing/2;
+                
+                for(let col = 0; col < cols; col++) {
+                    const xPos = -((cols-1) * horizontalSpacing)/2 + (col * horizontalSpacing) + xOffset;
+                    const hue = Math.random();
+                    const color = new THREE.Color().setHSL(hue, 0.7, 0.5);;
+                    this.initSphere(new THREE.Vector3(xPos, yPos, 0), 2, color);
+                }
+            }
+            this.initPlane(new THREE.Vector3(-15, -45, 0), new THREE.Vector3(0.4, 1, 0), 15, 12);
+            this.initPlane(new THREE.Vector3(15, -45, 0), new THREE.Vector3(-0.4, 1, 0), 15, 12);
+            
+            // Lower collection base
+            this.initPlane(new THREE.Vector3(0, -50, 0), new THREE.Vector3(0, 1, 0), 50, 50);
         }
         // todo: some other scenes 
-        // eg: "tetrominos", falling between several objects like plinko
+        // eg: "tetrominos"
         // 
         
         // Reset jello position

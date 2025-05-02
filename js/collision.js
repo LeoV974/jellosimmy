@@ -45,21 +45,14 @@ COLLISIONS.Plane.prototype.nodeBelow = function (node) {
     };
 };
 
-COLLISIONS.Plane.prototype.reflectVelocity = function(velocity, normal, elasticity) {
-    // Calculate reflected velocity: v' = v - 2(v·n)n
-    const dotProduct = velocity.dot(normal);
-    const reflection = velocity.sub(normal.clone().multiplyScalar(2 * dotProduct));
-    return reflection.multiplyScalar(elasticity);
-};
-
-COLLISIONS.Sphere = function (center, radius, scene) {
+COLLISIONS.Sphere = function (center, radius, scene, clr = new THREE.Color(0x888888)) {
     this.center = center || new THREE.Vector3(0, 0, 0);
     this.radius = radius || 5;
 
     // Create visual representation
     const geometry = new THREE.SphereGeometry(this.radius, 32, 32);
     const material = new THREE.MeshPhongMaterial({
-        color: 0x999999,
+        color: clr,
         side: THREE.DoubleSide,
         wireframe: false,
         transparent: true,
