@@ -285,15 +285,15 @@ class JelloSimulator {
             this.initSphere(new THREE.Vector3(-1.5, -14, +1.5), 1.25);
         } else if (type == 'scene4') {
             // Side boundaries
-            this.initPlane(new THREE.Vector3(-20, -7.5, 0), new THREE.Vector3(1, 0, 0), 50, 55);
-            this.initPlane(new THREE.Vector3(25, -7.5, 0), new THREE.Vector3(-1, 0, 0), 50, 55);
+            this.initPlane(new THREE.Vector3(-20, -47.5, 0), new THREE.Vector3(1, 0, 0), 50, 55);
+            this.initPlane(new THREE.Vector3(25, -47.5, 0), new THREE.Vector3(-1, 0, 0), 50, 55);
 
             // Staggered grid of large spheres
             const rows = 8;
             const cols = 5;
             const verticalSpacing = 8.5;
             const horizontalSpacing = 8.5;
-            const startY = 20;
+            const startY = -20;
             
             for(let row = 0; row < rows; row++) {
                 const yPos = startY - (row * verticalSpacing);
@@ -306,11 +306,11 @@ class JelloSimulator {
                     this.initSphere(new THREE.Vector3(xPos, yPos, 0), 2, color);
                 }
             }
-            this.initPlane(new THREE.Vector3(-15, -45, 0), new THREE.Vector3(0.4, 1, 0), 15, 12);
-            this.initPlane(new THREE.Vector3(15, -45, 0), new THREE.Vector3(-0.4, 1, 0), 15, 12);
+            this.initPlane(new THREE.Vector3(-15, -85, 0), new THREE.Vector3(0.4, 1, 0), 15, 12);
+            this.initPlane(new THREE.Vector3(15, -85, 0), new THREE.Vector3(-0.4, 1, 0), 15, 12);
             
             // Lower collection base
-            this.initPlane(new THREE.Vector3(0, -50, 0), new THREE.Vector3(0, 1, 0), 50, 50);
+            this.initPlane(new THREE.Vector3(0, -90, 0), new THREE.Vector3(0, 1, 0), 50, 50);
         }
         // todo: some other scenes 
         // eg: "tetrominos"
