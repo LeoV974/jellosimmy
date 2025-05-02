@@ -121,10 +121,11 @@ SIMMY.SpringMesh.prototype.calcInfluence = function(scene, tdelta) {
                     const ret = plane.nodeBelow(node);
                     if (ret.status) {
                         // reverted to 0ing velocity
-                        // node.position.copy(ret.proj); 
-                        // node.velocityVec.set(0,0,0);
+                        node.position.copy(ret.proj); 
+                        node.velocityVec.set(0,0,0);
 
 
+                        /*
                         // force of collision is modeled by k * d * n, 
                         // where k is a constant, d is the distance the particle has penetrated the surface, and n is the normal of the surface
                         const distance = node.position.distanceTo(ret.proj);
@@ -135,6 +136,7 @@ SIMMY.SpringMesh.prototype.calcInfluence = function(scene, tdelta) {
 
                         // ????
                         node.receiveInfluence(collision_force, tdelta);
+                        */
 
 
                         // velocity-based collision handling

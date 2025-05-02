@@ -252,14 +252,27 @@ class JelloSimulator {
         } else if (type == 'box') {
             this.initBox(-1, 1, -3, -1, -1, 1);
         } else if (type == 'scene1') {
+            // slide
             // just some placeholder stuff proof of concept that u can put multiple collision objects in 1 scene
-            this.initPlane(new THREE.Vector3(1, -5, 1), new THREE.Vector3(-1, 1, 0), 10, 10);
-            this.initSphere(new THREE.Vector3(1, -1, 1), 1);
-            this.initBox(-2, 0, -3, -1, -2, 0);
-            this.initBox(1, 2, -3, -1, 1, 2);
+            this.initPlane(new THREE.Vector3(0, -6, 0), new THREE.Vector3(1, 1, 1), 20, 20);
+            this.initPlane(new THREE.Vector3(0, -6, 0), new THREE.Vector3(-1, 1, 1), 20, 20);
+            this.initPlane(new THREE.Vector3(0, -10, 0), new THREE.Vector3(0, 1, 0), 20, 20)
+            // this.initSphere(new THREE.Vector3(2, -3, 2), 2);
+            // this.initBox(0.5, 5, -3, -1, -2, 0);
+            // this.initBox(-4, 2, -3, -1, -4, -1);
         } else if (type == 'scene2') {
             // incline plane scene
-            this.initPlane(new THREE.Vector3(1, -3, 1), new THREE.Vector3(-1, 1, 0), 10, 10);
+            this.initPlane(new THREE.Vector3(1, -3, 1), new THREE.Vector3(1, 1, 1), 10, 20);
+        } else if (type == 'scene3') {
+            this.initSphere(new THREE.Vector3(1.5, 0, 1.5), 1.25);
+            this.initSphere(new THREE.Vector3(1.5, -2, -1.5), 1.25);
+            this.initSphere(new THREE.Vector3(-1.5, -4, -1.5), 1.25);
+            this.initSphere(new THREE.Vector3(-1.5, -6, +1.5), 1.25);
+            this.initSphere(new THREE.Vector3(1.5, -8, 1.5), 1.25);
+            this.initSphere(new THREE.Vector3(1.5, -10, -1.5), 1.25);
+            this.initSphere(new THREE.Vector3(-1.5, -12, -1.5), 1.25);
+            this.initSphere(new THREE.Vector3(-1.5, -14, +1.5), 1.25);
+            
         }
         // todo: some other scenes 
         // eg: "tetrominos", falling between several objects like plinko
