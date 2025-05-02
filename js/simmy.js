@@ -5,6 +5,7 @@ const SIMMY = {};
 
 SIMMY.Simulator = function(gravity) {
     this.gravity = gravity || new THREE.Vector3(0,-9.8,0);
+    this.wind = 0;
     this.springMeshes = [];
     this.planes = [];
     this.spheres = [];
@@ -134,18 +135,18 @@ SIMMY.SpringMesh.prototype.calcExternalForces = function(externalForces) {
 
 SIMMY.SpringMesh.prototype.calcSpringForces = function() {
     let spring;
-    let nodeA;
-    let nodeB;
     for (let i = 0; i < this.linearSprings.length; i++) {
         spring = this.linearSprings[i];
-        nodeA = spring.node1;
-        nodeB = spring.node2;
-        // exert influence on its point nodes
-        // ??
+        // F = k * change in x
+        const dir = spring.node2.position.clone().sub(this.node1.position).normalize();
+        const newLength = spring.node2.position.clone().sub(this.node1.position).length();
+        const forceMagnitude = (spring.length - newLength) * spring.k;
+        
+        const force = dir.multiplyScalar(forceMagnitude);
+        spring.node1.forceVec.add(dir.multiplyScalar(-force * spring.node1.mass));
+        spring.node2.forceVec.add(dir.multiplyScalar(force * spring.node2.mass));
     }
     let angleSpring;
-    let s1;
-    let s2;
     for (let i = 0; i < this.angleSprings.length; i++) {
         spring = this.angleSprings[i];
         // TODO fml
@@ -175,9 +176,6 @@ SIMMY.SpringMesh.prototype.applyForces = function(tdelta) {
     }
     
 }
-
-
-
 
 
 // SIMMY.Simulator.prototype.update = function(tdelta) {
