@@ -99,15 +99,23 @@ SIMMY.Simulator.prototype.update = function(tdelta) {
         this.springMeshes[i].calcExternalForces(this.gravity.add(this.wind));
 
         // for each spring, apply correction force to each endpoint.
-        // this.springMeshes[i].calcSpringForces();
+        this.springMeshes[i].calcSpringForces();
 
         // use implicit euler to compute new point mass positions.
         this.springMeshes[i].applyForces();
-
-        // handle collisions with other primitives. 
-        
     }
     
+    // handle collisions with other primitives. 
+    for (let i = 0; i < this.planes.length; i++) {
+        this.springMeshes[i].handleCollisions(this.planes[i]);
+    }
+    for (let i = 0; i < this.spheres.length; i++) {
+        this.springMeshes[i].handleCollisions(this.spheres[i]);
+    }
+    for (let i = 0; i < this.boxes.length; i++) {
+        this.springMeshes[i].handleCollisions(this.boxes[i]);
+    }
+
 }
 
 SIMMY.SpringMesh.prototype.resetForces = function() {
@@ -152,6 +160,10 @@ SIMMY.SpringMesh.prototype.calcSpringForces = function() {
     for (let i = 0; i < this.angleSprings.length; i++) {
         spring = this.angleSprings[i];
         // TODO fml
+        // the prev anglespring code was complete garbage
+        // we just need to test if the angle is much bigger/smaller than 90 degrees
+        // but tbh if angle springs arent even necessary then I'm not gonna bother to fill this
+        
     }
 };
 
@@ -172,12 +184,39 @@ SIMMY.SpringMesh.prototype.applyForces = function(tdelta) {
 
                 // update position
                 const posDiff = node.velocityVec.clone().multiplyScalar(tdelta);
+                // HERMAN HELP ME
                 // WHY IS NODE.POSITION NULL???
                 node.position.add(posDiff);
             }
         }
     }
     
+}
+
+SIMMY.SpringMesh.prototype.handleCollisions = function(obj) {
+    let node;
+    for (let i = 0; i < this.nodes.length; i++) {
+        for (let j = 0; j < this.nodes[i].length; j++) {
+            for (let k = 0; k < this.nodes[i][j].length; k++) {
+                node = this.nodes[i][j][k];
+
+                const ret = obj.nodeBelow(node);
+                if (ret.status) {
+                // force of collision is modeled by k * d * n, 
+                // where k is a constant, d is the distance the particle has penetrated the surface, and n is the normal of the surface
+                const distance = node.position.distanceTo(ret.proj);
+
+                // force of imaginary collision spring
+                // todo: decide wheres the best place to store k_collision
+                // todo: ret doesn't have normal rn herman said he added it so I'll have to merge those changes later
+                const collision_force = ret.normal.clone().normalize().multiplyScalar(scene.k_collision * distance);
+            
+                node.aVec.add(collision_force);
+                }
+                
+            }
+        }
+    }
 }
 
 
