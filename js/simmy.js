@@ -55,7 +55,9 @@ SIMMY.SpringMesh.prototype.addNode = function(i, j, k, node) {
 
 SIMMY.SpringNode = function(position, mass) {
     this.velocityVec = new THREE.Vector3(0,0,0);
-    this.position = position;
+    this.position = position.clone();
+    // console.log(position);
+    // console.log(this.position);
     this.mass = mass;
     this.linearSprings = [];
     this.angleSprings = [];
@@ -103,7 +105,7 @@ SIMMY.Simulator.prototype.update = function(tdelta) {
         this.springMeshes[i].applyForces();
 
         // handle collisions with other primitives. 
-        // ASUIOUJFIOWEJFIOWEJF 
+        
     }
     
 }
@@ -172,8 +174,6 @@ SIMMY.SpringMesh.prototype.applyForces = function(tdelta) {
                 const posDiff = node.velocityVec.clone().multiplyScalar(tdelta);
                 // WHY IS NODE.POSITION NULL???
                 node.position.add(posDiff);
-                
-
             }
         }
     }

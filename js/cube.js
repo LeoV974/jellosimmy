@@ -29,7 +29,9 @@ SIMMY.Cube = function(xSize, ySize, zSize, xNodes, yNodes, zNodes, x, y, z, scen
             for (k = 0; k < zNodes; k++) {
                 const currentZ = startZ + k*diffZ;
                 const position = new THREE.Vector3(currentX, currentY, currentZ);
+                // console.log(position);
                 node = new SIMMY.SpringNode(position, 1);
+                console.log(node.position.clone());
                 this.addNode(i, j, k, node);
                 nodesDict[i+"_"+j+"_"+k] = node;
             }
