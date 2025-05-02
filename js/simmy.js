@@ -10,7 +10,7 @@ SIMMY.Simulator = function(gravity) {
     this.planes = [];
     this.spheres = [];
     this.boxes = [];
-    // this.k_collision = 500; // change this to adjust how "bouncy" collisions are
+    this.k_collision = 500; // change this to adjust how "bouncy" collisions are
 };
 
 SIMMY.Simulator.prototype.addSpringMesh = function(obj) {
@@ -110,19 +110,19 @@ SIMMY.Simulator.prototype.update = function(tdelta) {
         // for each spring, apply correction force to each endpoint.
         this.springMeshes[i].calcSpringForces();
 
+        // handle collisions with other primitives. 
+        for (let j = 0; j < this.planes.length; j++) {
+            this.springMeshes[i].handleCollisions(this.planes[i], this.k_collision);
+        }
+        for (let j = 0; j < this.spheres.length; j++) {
+            this.springMeshes[j].handleCollisions(this.spheres[j], this.k_collision);
+        }
+        for (let j = 0; j < this.boxes.length; j++) {
+            this.springMeshes[j].handleCollisions(this.boxes[j], this.k_collision);
+        }
+
         // use implicit euler to compute new point mass positions.
         this.springMeshes[i].applyForces(tdelta);
-    }
-    
-    // handle collisions with other primitives. 
-    for (let i = 0; i < this.planes.length; i++) {
-        this.springMeshes[i].handleCollisions(this.planes[i]);
-    }
-    for (let i = 0; i < this.spheres.length; i++) {
-        this.springMeshes[i].handleCollisions(this.spheres[i]);
-    }
-    for (let i = 0; i < this.boxes.length; i++) {
-        this.springMeshes[i].handleCollisions(this.boxes[i]);
     }
 
 }
@@ -228,7 +228,7 @@ SIMMY.SpringMesh.prototype.applyForces = function(tdelta) {
     
 }
 
-SIMMY.SpringMesh.prototype.handleCollisions = function(obj) {
+SIMMY.SpringMesh.prototype.handleCollisions = function(obj, k_collision) {
     let node;
     for (let i = 0; i < this.nodes.length; i++) {
         for (let j = 0; j < this.nodes[i].length; j++) {
@@ -239,18 +239,18 @@ SIMMY.SpringMesh.prototype.handleCollisions = function(obj) {
                 // console.log(node.position.clone());
                 const ret = obj.nodeBelow(node);
                 if (ret.status) {
+
                 // force of collision is modeled by k * d * n, 
                 // where k is a constant, d is the distance the particle has penetrated the surface, and n is the normal of the surface
-                
-                
                 const distance = node.position.distanceTo(ret.proj);
 
+                // console.log(k_collision);
+
                 // force of imaginary collision spring
-                // todo: decide wheres the best place to store k_collision
-                // todo: ret doesn't have normal rn herman said he added it so I'll have to merge those changes later
-                const collision_force = ret.normal.clone().normalize().multiplyScalar(this.k_collision * distance);
-            
-                node.aVec.add(collision_force);
+                const collision_force = ret.normal.clone().normalize().multiplyScalar(k_collision * distance);
+                // console.log(collision_force);
+                node.forceVec.add(collision_force);
+                // console.log(node.forceVec);
                 }
                 
             }

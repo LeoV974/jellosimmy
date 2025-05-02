@@ -17,7 +17,9 @@ class JelloSimulator {
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
         this.controls.enableDamping = true;
         this.controls.dampingFactor = 0.05;
-        this.simulator = new SIMMY.Simulator(new THREE.Vector3(0, -9.8, 0));
+        // changed gravity from -9.8 -98, let's pretend that our simulation is in units of 1 unit = 0.1m
+        // bc a 2.5m jello cube "looks" like it falls too slowly, but that's bc we never see jello cubes that r 2.5m
+        this.simulator = new SIMMY.Simulator(new THREE.Vector3(0, -98, 0));
         this.setupLights();
         
         // Setup material presets first
