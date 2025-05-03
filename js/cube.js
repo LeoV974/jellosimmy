@@ -528,3 +528,251 @@ SIMMY.Cube = function(xSize, ySize, zSize, xNodes, yNodes, zNodes, x, y, z, scen
 
 SIMMY.Cube.prototype = Object.create(SIMMY.SpringMesh.prototype);
 SIMMY.Cube.prototype.constructor = SIMMY.Cube;
+
+
+
+// T-Tetromino class (four cubes in a T-shape)
+SIMMY.TTetromino = function(cubeSize, nodesPerCube, x, y, z, scene) {
+    SIMMY.SpringMesh.call(this);
+    
+    this.cubeSize = cubeSize;
+    this.nodesPerCube = nodesPerCube;
+    this.cubes = [];
+    
+    // Create four cubes arranged in a T-shape
+    // Center cube
+    const centerCube = new SIMMY.Cube(
+        cubeSize, cubeSize, cubeSize, 
+        nodesPerCube, nodesPerCube, nodesPerCube, 
+        x, y, z, 
+        scene
+    );
+    
+    // Top cube (above center)
+    const topCube = new SIMMY.Cube(
+        cubeSize, cubeSize, cubeSize, 
+        nodesPerCube, nodesPerCube, nodesPerCube, 
+        x, y + cubeSize, z, 
+        scene
+    );
+    
+    // Left cube (left of center)
+    const leftCube = new SIMMY.Cube(
+        cubeSize, cubeSize, cubeSize, 
+        nodesPerCube, nodesPerCube, nodesPerCube, 
+        x - cubeSize, y, z, 
+        scene
+    );
+    
+    // Right cube (right of center)
+    const rightCube = new SIMMY.Cube(
+        cubeSize, cubeSize, cubeSize, 
+        nodesPerCube, nodesPerCube, nodesPerCube, 
+        x + cubeSize, y, z, 
+        scene
+    );
+    
+    // Store cubes in array
+    this.cubes.push(centerCube, topCube, leftCube, rightCube);
+    
+    // Add all cubes to the spring mesh
+    // for (let i = 0; i < this.cubes.length; i++) {
+    //     this.addSpringMesh(this.cubes[i]);
+    // }
+    
+    // Connect cubes with springs
+    this.connectCubes();
+    
+    // Method to reset the tetromino
+    this.reset = function() {
+        for (let i = 0; i < this.cubes.length; i++) {
+            this.cubes[i].reset();
+        }
+    };
+    
+    // Method to disturb the tetromino
+    this.disturb = function() {
+        // Apply disturbance to a random cube
+        const randomCubeIndex = Math.floor(Math.random() * this.cubes.length);
+        this.cubes[randomCubeIndex].disturb();
+    };
+    
+    // Method to update geometry of all cubes
+    this.updateGeometry = function() {
+        for (let i = 0; i < this.cubes.length; i++) {
+            this.cubes[i].updateGeometry();
+        }
+    };
+};
+
+// Inherit from SpringMesh
+SIMMY.TTetromino.prototype = Object.create(SIMMY.SpringMesh.prototype);
+SIMMY.TTetromino.prototype.constructor = SIMMY.TTetromino;
+
+// Method to connect cubes with springs
+SIMMY.TTetromino.prototype.connectCubes = function() {
+    const k_connect = 50; // Spring constant for connections between cubes
+    
+    // Function to get node by position in the cube's grid (i, j, k are 0 to nodesPerCube-1)
+    const getNode = (cube, i, j, k) => {
+        return cube.nodesDict[i + "_" + j + "_" + k];
+    };
+    
+    // Center cube connects to top cube
+    this.connectCubeFaces(
+        this.cubes[0], // center
+        this.cubes[1], // top
+        "top",         // face on center cube
+        "bottom"       // face on top cube
+    );
+    
+    // Center cube connects to left cube
+    this.connectCubeFaces(
+        this.cubes[0], // center
+        this.cubes[2], // left
+        "left",        // face on center cube
+        "right"        // face on left cube
+    );
+    
+    // Center cube connects to right cube
+    this.connectCubeFaces(
+        this.cubes[0], // center
+        this.cubes[3], // right
+        "right",       // face on center cube
+        "left"         // face on right cube
+    );
+    
+    // Add diagonal cross bracing for additional stability
+    this.addCrossBracing();
+};
+
+// Method to connect two cube faces
+SIMMY.TTetromino.prototype.connectCubeFaces = function(cube1, cube2, face1, face2) {
+    const n = this.nodesPerCube;
+    const k_connect = 50; // Spring constant for connections between cubes
+    
+    // Function to get node by position in the cube's grid
+    const getNode = (cube, i, j, k) => {
+        return cube.nodesDict[i + "_" + j + "_" + k];
+    };
+    
+    // Map faces to the corresponding fixed coordinate and axis
+    const faceMap = {
+        "left":   { fixedAxis: "x", fixedIndex: 0 },
+        "right":  { fixedAxis: "x", fixedIndex: n - 1 },
+        "bottom": { fixedAxis: "y", fixedIndex: 0 },
+        "top":    { fixedAxis: "y", fixedIndex: n - 1 },
+        "back":   { fixedAxis: "z", fixedIndex: 0 },
+        "front":  { fixedAxis: "z", fixedIndex: n - 1 }
+    };
+    
+    const face1Info = faceMap[face1];
+    const face2Info = faceMap[face2];
+    
+    // Iterate through nodes on the faces and connect corresponding nodes
+    for (let i = 0; i < n; i++) {
+        for (let j = 0; j < n; j++) {
+            let node1, node2;
+            
+            // Get nodes from the appropriate faces based on the fixed axis
+            if (face1Info.fixedAxis === "x") {
+                node1 = getNode(cube1, face1Info.fixedIndex, i, j);
+            } else if (face1Info.fixedAxis === "y") {
+                node1 = getNode(cube1, i, face1Info.fixedIndex, j);
+            } else { // z
+                node1 = getNode(cube1, i, j, face1Info.fixedIndex);
+            }
+            
+            if (face2Info.fixedAxis === "x") {
+                node2 = getNode(cube2, face2Info.fixedIndex, i, j);
+            } else if (face2Info.fixedAxis === "y") {
+                node2 = getNode(cube2, i, face2Info.fixedIndex, j);
+            } else { // z
+                node2 = getNode(cube2, i, j, face2Info.fixedIndex);
+            }
+            
+            // Create a spring between the nodes
+            const distance = node1.position.clone().sub(node2.position).length();
+            const spring = new SIMMY.Spring(node1, node2, distance, k_connect);
+            node1.addSpring(spring);
+        }
+    }
+};
+
+// Add cross bracing between cubes for additional stability
+SIMMY.TTetromino.prototype.addCrossBracing = function() {
+    const n = this.nodesPerCube;
+    const k_brace = 25; // Lower spring constant for diagonal bracing
+    
+    // Function to get node by position in the cube's grid
+    const getNode = (cube, i, j, k) => {
+        return cube.nodesDict[i + "_" + j + "_" + k];
+    };
+    
+    // Connect diagonally between center and top cubes
+    this.connectDiagonally(this.cubes[0], this.cubes[1], "top");
+    
+    // Connect diagonally between center and left cubes
+    this.connectDiagonally(this.cubes[0], this.cubes[2], "left");
+    
+    // Connect diagonally between center and right cubes
+    this.connectDiagonally(this.cubes[0], this.cubes[3], "right");
+};
+
+// Connect two cubes with diagonal springs
+SIMMY.TTetromino.prototype.connectDiagonally = function(cube1, cube2, direction) {
+    const n = this.nodesPerCube;
+    const k_brace = 25; // Spring constant for diagonal connections
+    
+    // Function to get node by position in the cube's grid
+    const getNode = (cube, i, j, k) => {
+        return cube.nodesDict[i + "_" + j + "_" + k];
+    };
+    
+    // Connect based on direction
+    if (direction === "top") {
+        // Connect corners of top face of cube1 to corners of bottom face of cube2
+        // These are longer-range connections (two steps away)
+        for (let i = 0; i < n; i += n-1) { // Only corners (0 and n-1)
+            for (let k = 0; k < n; k += n-1) {
+                const node1 = getNode(cube1, i, n-1, k);      // Top face corner
+                const node2 = getNode(cube2, n-1-i, 0, n-1-k); // Bottom face opposite corner
+                
+                const distance = node1.position.clone().sub(node2.position).length();
+                const spring = new SIMMY.Spring(node1, node2, distance, k_brace);
+                node1.addSpring(spring);
+            }
+        }
+    }
+    else if (direction === "left") {
+        // Connect corners of left face of cube1 to corners of right face of cube2
+        for (let j = 0; j < n; j += n-1) {
+            for (let k = 0; k < n; k += n-1) {
+                const node1 = getNode(cube1, 0, j, k);        // Left face corner
+                const node2 = getNode(cube2, n-1, n-1-j, n-1-k); // Right face opposite corner
+                
+                const distance = node1.position.clone().sub(node2.position).length();
+                const spring = new SIMMY.Spring(node1, node2, distance, k_brace);
+                node1.addSpring(spring);
+            }
+        }
+    }
+    else if (direction === "right") {
+        // Connect corners of right face of cube1 to corners of left face of cube2
+        for (let j = 0; j < n; j += n-1) {
+            for (let k = 0; k < n; k += n-1) {
+                const node1 = getNode(cube1, n-1, j, k);      // Right face corner
+                const node2 = getNode(cube2, 0, n-1-j, n-1-k); // Left face opposite corner
+                
+                const distance = node1.position.clone().sub(node2.position).length();
+                const spring = new SIMMY.Spring(node1, node2, distance, k_brace);
+                node1.addSpring(spring);
+            }
+        }
+    }
+};
+
+// Helper method to add the tetromino to a simulator
+SIMMY.TTetromino.prototype.addToSimulator = function(simulator) {
+    simulator.addSpringMesh(this);
+};
