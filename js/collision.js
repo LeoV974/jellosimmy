@@ -27,6 +27,7 @@ COLLISIONS.Plane = function (position, normal, width, height, scene) {
 COLLISIONS.Plane.prototype.nodeBelow = function (node) {
     const projPoint = new THREE.Vector3();
     this.plane.projectPoint(node.position, projPoint);
+    projPoint.add(this.normal.clone().multiplyScalar(0.001)); // slight offset
     const nodeVec = node.position.clone().sub(projPoint).normalize();
     const isBelowPlane = nodeVec.dot(this.normal) < 0;
     if (isBelowPlane) {
@@ -52,14 +53,14 @@ COLLISIONS.Plane.prototype.reflectVelocity = function(velocity, normal, elastici
     return reflection.multiplyScalar(elasticity);
 };
 
-COLLISIONS.Sphere = function (center, radius, scene, clr = new THREE.Color(0x888888)) {
+COLLISIONS.Sphere = function (center, radius, scene) {
     this.center = center || new THREE.Vector3(0, 0, 0);
     this.radius = radius || 5;
 
     // Create visual representation
     const geometry = new THREE.SphereGeometry(this.radius, 32, 32);
     const material = new THREE.MeshPhongMaterial({
-        color: clr,
+        color: 0x999999,
         side: THREE.DoubleSide,
         wireframe: false,
         transparent: true,
@@ -170,24 +171,36 @@ COLLISIONS.Box.prototype.nodeBelow = function (node) {
         
         // Project to closest face
         let projPoint = node.position.clone();
+        let direction;
         
         if (minDist === distToXMin) {
             projPoint.x = this.xMin - 0.05; // Push slightly outside
+            direction = new THREE.Vector3(-1, 0, 0);
         } else if (minDist === distToXMax) {
             projPoint.x = this.xMax + 0.05; // Push slightly outside
+            direction = new THREE.Vector3(1, 0, 0);
         } else if (minDist === distToYMin) {
             projPoint.y = this.yMin - 0.05; // Push slightly outside
+            direction = new THREE.Vector3(0, -1, 0);
         } else if (minDist === distToYMax) {
             projPoint.y = this.yMax + 0.05; // Push slightly outside
+            direction = new THREE.Vector3(0, 1, 0);
         } else if (minDist === distToZMin) {
             projPoint.z = this.zMin - 0.05; // Push slightly outside
+            direction = new THREE.Vector3(0, 0, -1);
         } else if (minDist === distToZMax) {
             projPoint.z = this.zMax + 0.05; // Push slightly outside
+            direction = new THREE.Vector3(0, 0, 1);
         }
+        
+        projPoint.add(direction.multiplyScalar(0.1));
+        const reflectedVelocity = this.reflectVelocity(node.velocityVec.clone(), direction, this.elasticity);
         
         return {
             status: true,
-            proj: projPoint
+            proj: projPoint,
+            reflectedVel: reflectedVelocity,
+            normal: direction
         };
     }
     
@@ -196,5 +209,11 @@ COLLISIONS.Box.prototype.nodeBelow = function (node) {
         proj: node.position.clone()
     };
 };
-export { COLLISIONS };
 
+COLLISIONS.Box.prototype.reflectVelocity = function(velocity, normal, elasticity) {
+    // Calculate reflected velocity: v' = v - 2(v·n)n
+    const dotProduct = velocity.dot(normal);
+    const reflection = velocity.sub(normal.clone().multiplyScalar(2 * dotProduct));
+    return reflection.multiplyScalar(elasticity);
+}
+export { COLLISIONS };

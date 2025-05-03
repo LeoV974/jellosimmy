@@ -120,23 +120,8 @@ SIMMY.SpringMesh.prototype.calcInfluence = function(scene, tdelta) {
                     const plane = scene.planes[n];
                     const ret = plane.nodeBelow(node);
                     if (ret.status) {
-                        // reverted to 0ing velocity
                         node.position.copy(ret.proj); 
                         node.velocityVec.projectOnVector(ret.normal);
-
-
-                        // velocity-based collision handling
-                        // const offset = 0.001;
-                        // node.position.copy(ret.proj.add(plane.normal.clone().multiplyScalar(offset)));
-                        
-                        // // Calculate bounce with capped restitution
-                        // const restitution = 0.2;
-                        // const normal = plane.normal.clone();
-                        // const vDotN = node.velocityVec.dot(normal);
-
-                        // if (vDotN < 0) {
-                        //     node.velocityVec.add(normal.multiplyScalar(-vDotN * (1 + restitution)));
-                        // }
                     }
                 }
                 
@@ -145,21 +130,8 @@ SIMMY.SpringMesh.prototype.calcInfluence = function(scene, tdelta) {
                     const sphere = scene.spheres[n];
                     const ret = sphere.nodeBelow(node);
                     if (ret.status) {
-                        // reverted to 0ing velocity
                         node.position.copy(ret.proj); 
                         node.velocityVec.projectOnVector(ret.normal);
-
-                        // const normal = node.position.clone().sub(sphere.center).normalize();
-                        
-                        // // Move node slightly outside the sphere
-                        // const offset = 0.001;
-                        // node.position.copy(sphere.center.clone().add(normal.multiplyScalar(sphere.radius + offset)));
-                        // const restitution = 0.2;
-                        // const vDotN = node.velocityVec.dot(normal);
-            
-                        // if (vDotN < 0) {
-                        //     node.velocityVec.add(normal.multiplyScalar(-vDotN * (1 + restitution)));
-                        // }
                     }
                 }
 
@@ -170,9 +142,6 @@ SIMMY.SpringMesh.prototype.calcInfluence = function(scene, tdelta) {
                     if (ret.status) {
                         node.position.copy(ret.proj);
                         node.velocityVec.projectOnVector(ret.normal);
-                        // lol
-                        // I don't want to do this stuff yet bc I would like to consolidate all collision objects into one loop
-                        // and if possible have collisions be handled by creating an imaginary collision spring
                     }
                 }
 
