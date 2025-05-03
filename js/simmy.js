@@ -122,21 +122,7 @@ SIMMY.SpringMesh.prototype.calcInfluence = function(scene, tdelta) {
                     if (ret.status) {
                         // reverted to 0ing velocity
                         node.position.copy(ret.proj); 
-                        node.velocityVec.set(0,0,0);
-
-
-                        /*
-                        // force of collision is modeled by k * d * n, 
-                        // where k is a constant, d is the distance the particle has penetrated the surface, and n is the normal of the surface
-                        const distance = node.position.distanceTo(ret.proj);
-                        console.log(distance);
-                        // force of imaginary collision spring
-                        const collision_force = plane.normal.clone().normalize().multiplyScalar(scene.k_collision * distance);
-                        console.log(collision_force);
-
-                        // ????
-                        node.receiveInfluence(collision_force, tdelta);
-                        */
+                        node.velocityVec.projectOnVector(ret.normal);
 
 
                         // velocity-based collision handling
@@ -161,7 +147,7 @@ SIMMY.SpringMesh.prototype.calcInfluence = function(scene, tdelta) {
                     if (ret.status) {
                         // reverted to 0ing velocity
                         node.position.copy(ret.proj); 
-                        node.velocityVec.set(0,0,0);
+                        node.velocityVec.projectOnVector(ret.normal);
 
                         // const normal = node.position.clone().sub(sphere.center).normalize();
                         
@@ -183,7 +169,7 @@ SIMMY.SpringMesh.prototype.calcInfluence = function(scene, tdelta) {
                     const ret = box.nodeBelow(node);
                     if (ret.status) {
                         node.position.copy(ret.proj);
-                        node.velocityVec.set(0,0,0);
+                        node.velocityVec.projectOnVector(ret.normal);
                         // lol
                         // I don't want to do this stuff yet bc I would like to consolidate all collision objects into one loop
                         // and if possible have collisions be handled by creating an imaginary collision spring
