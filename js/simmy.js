@@ -131,7 +131,7 @@ SIMMY.SpringMesh.prototype.calcInfluence = function(scene, tdelta) {
                     const ret = sphere.nodeBelow(node);
                     if (ret.status) {
                         node.position.copy(ret.proj); 
-                        node.velocityVec.projectOnVector(ret.normal);
+                        // node.velocityVec.projectOnVector(ret.normal);
                     }
                 }
 
@@ -141,7 +141,7 @@ SIMMY.SpringMesh.prototype.calcInfluence = function(scene, tdelta) {
                     const ret = box.nodeBelow(node);
                     if (ret.status) {
                         node.position.copy(ret.proj);
-                        node.velocityVec.projectOnVector(ret.normal);
+                        // node.velocityVec.projectOnVector(ret.normal);
                     }
                 }
 
