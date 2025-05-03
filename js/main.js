@@ -269,14 +269,15 @@ class JelloSimulator {
             this.initSphere(new THREE.Vector3(0, -5, 0), 2);
         } else if (type == 'box') {
             this.initBox(-1, 1, -3, -1, -1, 1);
-        } else if (type == 'scene1') {
-            // the chute 
-            this.initPlane(new THREE.Vector3(0, -6, 0), new THREE.Vector3(1, 1, 1), 20, 20);
-            this.initPlane(new THREE.Vector3(0, -6, 0), new THREE.Vector3(-1, 1, 1), 20, 20);
+        // } else if (type == 'scene1') {
+        //     // the chute 
+        //     this.initPlane(new THREE.Vector3(0, -6, 0), new THREE.Vector3(1, 1, 1), 20, 20);
+        //     this.initPlane(new THREE.Vector3(0, -6, 0), new THREE.Vector3(-1, 1, 1), 20, 20);
         } else if (type == 'scene2') {
             // incline plane scene
             this.initPlane(new THREE.Vector3(1, -4, 1), new THREE.Vector3(1, 1, 1), 10, 20);
         } else if (type == 'scene3') {
+            // the helix
             this.initSphere(new THREE.Vector3(1.5, 0, 1.5), 1.25);
             this.initSphere(new THREE.Vector3(1.5, -2, -1.5), 1.25);
             this.initSphere(new THREE.Vector3(-1.5, -4, -1.5), 1.25);
@@ -285,6 +286,14 @@ class JelloSimulator {
             this.initSphere(new THREE.Vector3(1.5, -10, -1.5), 1.25);
             this.initSphere(new THREE.Vector3(-1.5, -12, -1.5), 1.25);
             this.initSphere(new THREE.Vector3(-1.5, -14, +1.5), 1.25);
+            this.initSphere(new THREE.Vector3(1.5, -16, 1.5), 1.25);
+            this.initSphere(new THREE.Vector3(1.5, -18, -1.5), 1.25);
+            this.initSphere(new THREE.Vector3(-1.5, -20, -1.5), 1.25);
+            this.initSphere(new THREE.Vector3(-1.5, -22, +1.5), 1.25);
+            this.initSphere(new THREE.Vector3(1.5, -24, 1.5), 1.25);
+            this.initSphere(new THREE.Vector3(1.5, -26, -1.5), 1.25);
+            this.initSphere(new THREE.Vector3(-1.5, -28, -1.5), 1.25);
+            this.initSphere(new THREE.Vector3(-1.5, -30, +1.5), 1.25);
         } else if (type == 'scene4') {
             // Side boundaries
             this.initPlane(new THREE.Vector3(-20, -47.5, 0), new THREE.Vector3(1, 0, 0), 50, 55);
