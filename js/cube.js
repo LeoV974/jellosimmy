@@ -6,7 +6,7 @@ SIMMY.Cube = function(xSize, ySize, zSize, xNodes, yNodes, zNodes, x, y, z, scen
     // Create geometry for the jello cube
     const geometry = new THREE.BufferGeometry();
     
-    const k_s = 50; // spring constant
+    const k_s = 500; // spring constant
     const kAngleSpring = 20;   // Angle spring strength
     const nodesDict = {};
     this.linearSprings = [];

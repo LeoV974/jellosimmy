@@ -10,7 +10,7 @@ SIMMY.Simulator = function(gravity) {
     this.planes = [];
     this.spheres = [];
     this.boxes = [];
-    this.k_collision = 1000; // change this to adjust how "bouncy" collisions are
+    this.k_collision = 500; // change this to adjust how "bouncy" collisions are
     // idk im having the problem where at like 80 it bounces way too far
     // but any lower and it falls through the plane
 };
@@ -229,9 +229,25 @@ SIMMY.SpringMesh.prototype.handleCollisions = function(obj, k_collision) {
 
                 // force of imaginary collision spring
                 const collision_force = ret.normal.clone().normalize().multiplyScalar(k_collision * distance);
-                // console.log(collision_force);
-                node.forceVec.add(collision_force);
+                console.log("collision spring force");
+                console.log(collision_force);
+                // node.forceVec.add(collision_force);
                 // console.log(node.forceVec);
+
+                const existing_force = node.forceVec.projectOnVector(ret.normal);
+                console.log("existing")
+                console.log(existing_force);
+
+                node.forceVec = existing_force.clone().add(collision_force);
+                // node.velocityVec.set(ret.reflectedVel);
+                console.log("force vec after");
+                console.log(node.forceVec);
+
+                node.position.copy(ret.proj);
+                console.log("pos after");
+                console.log(node.position);
+
+                
                 }
                 
             }

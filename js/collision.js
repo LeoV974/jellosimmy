@@ -27,6 +27,7 @@ COLLISIONS.Plane = function (position, normal, width, height, scene) {
 COLLISIONS.Plane.prototype.nodeBelow = function (node) {
     const projPoint = new THREE.Vector3();
     this.plane.projectPoint(node.position, projPoint);
+    projPoint.add(this.normal.clone().multiplyScalar(0.001)); // slight offset
     const nodeVec = node.position.clone().sub(projPoint).normalize();
     const isBelowPlane = nodeVec.dot(this.normal) < 0;
     if (isBelowPlane) {
@@ -88,7 +89,7 @@ COLLISIONS.Sphere.prototype.nodeBelow = function (node) {
             status: true,
             proj: projPoint,
             reflectedVel: reflectedVelocity,
-            normal: direction.multiplyScalar(-1)
+            normal: direction
         };
     }
 
